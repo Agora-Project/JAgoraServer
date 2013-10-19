@@ -1,0 +1,1 @@
+Main-Class: org.agora.server.JAgoraServer
