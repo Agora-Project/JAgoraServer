@@ -10,95 +10,144 @@
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: Handles the AgoraServer daemon
-# Description:       Uses jsvc to handle the Java implementation of the
-#                    AgoraServer daemon. Needs connection to database.
+# Description:       DOES THINGS. AMAZING THINGS
 ### END INIT INFO	
 
-# Author:   Agora Project
+# Author: João Martins <anvilfolk@gmail.com> 
 # Url:      https://github.com/Agora-Project/AgoraDevDocs/wiki
 
-# Credits to Sheldon Neilson for his article (http://www.neilson.co.za/?p=253)
+# Do NOT "set -e"
 
-. /lib/lsb/init-functions
-
+# PATH should only include /usr/* if it runs after the mountnfs.sh script
 NAME="agorad"
 DESC="JAgoraServer Daemon"
+DAEMON=/usr/bin/java
+PIDFILE=/var/run/$NAME.pid
+SCRIPTNAME=/etc/init.d/$NAME
 
-# The path to Jsvc
-JSVC="/usr/bin/jsvc"
+JAR=/usr/lib/agora/JAgoraServer.jar
+CP="\"\""
+DAEMON_ARGS="-server -cp $CP -jar $JAR"
 
-# The path to the folder containing MyDaemon.jar
-FILE_PATH="/usr/lib/agora"
+# Exit if the package is not installed
+[ -x "$DAEMON" ] || exit 0
 
-# The path to the folder containing the java runtime
-# This is assumed to be defined. Otherwise define it here.
-JAVA_HOME="/usr/lib/jvm/java-6-openjdk-amd64"
+# Load the VERBOSE setting and other rcS variables
+. /lib/init/vars.sh
+VERBOSE=yes
 
-# Our classpath including our jar file and the Apache Commons Daemon library
-CLASS_PATH="$FILE_PATH/JAgoraServer.jar:$FILE_PATH/lib/commons-daemon-1.0.15.jar"
+# Define LSB log_* functions.
+# Depend on lsb-base (>= 3.2-14) to ensure that this file is present
+# and status_of_proc is working.
+. /lib/lsb/init-functions
 
-# The fully qualified name of the class to execute
-CLASS="org.agora.server.JAgoraServer"
+#
+# Function that starts the daemon/service
+#
+do_start()
+{
+	# Return
+	#   0 if daemon has been started
+	#   1 if daemon was already running
+	#   2 if daemon could not be started
+	start-stop-daemon --start --quiet --pidfile $PIDFILE --exec $DAEMON --test > /dev/null \
+		|| return 1
+	start-stop-daemon --start --quiet --background --make-pidfile --pidfile $PIDFILE --exec $DAEMON -- \
+		$DAEMON_ARGS \
+		|| return 2
+	# Add code here, if necessary, that waits for the process to be ready
+	# to handle requests from services started subsequently which depend
+	# on this one.  As a last resort, sleep for some time.
+}
 
-# Any command line arguments to be passed to the our Java Daemon implementations init() method 
-ARGS=""
+#
+# Function that stops the daemon/service
+#
+do_stop()
+{
+	# Return
+	#   0 if daemon has been stopped
+	#   1 if daemon was already stopped
+	#   2 if daemon could not be stopped
+	#   other if a failure occurred
+	
+	# Check whether pid file is not there - then the daemon is stopped.
+	[ ! -f $PIDFILE ] && return 1
+	
+	kill -9 `cat $PIDFILE`
+	rm $PIDFILE
+	return 0
+}
 
-#The user to run the daemon as
-USER="root"
-
-# The file that will contain our process identification number (pid) for other scripts/programs that need to access it.
-PID="/var/run/$NAME.pid"
-
-# System.out writes to this file...
-LOG_OUT="/var/log/$NAME.log"
-
-# System.err writes to this file...
-LOG_ERR="/var/log/$NAME.err"
-
-jsvc_exec()
-{   
-	echo $JSVC -home $JAVA_HOME -cp $CLASS_PATH -user $USER -outfile $LOG_OUT -errfile $LOG_ERR -pidfile $PID $1 $CLASS $ARGS 
-    $JSVC -home $JAVA_HOME -cp $CLASS_PATH -user $USER -outfile $LOG_OUT -errfile $LOG_ERR -pidfile $PID $1 $CLASS $ARGS
+#
+# Function that sends a SIGHUP to the daemon/service
+#
+do_reload() {
+	#
+	# If the daemon can reload its configuration without
+	# restarting (for example, when it is sent a SIGHUP),
+	# then implement that here.
+	#
+	start-stop-daemon --stop --signal 1 --quiet --pidfile $PIDFILE --name $NAME
+	return 0
 }
 
 case "$1" in
-    start)  
-        echo -n "[$DESC] Starting..."        
-        
-        # Start the service
-        jsvc_exec
-        
-        echo " done."
-    ;;
-    stop)
-        echo -n "[$DESC] Stopping..."
-        
-        # Stop the service
-        jsvc_exec "-stop"       
-        
-        echo " done."
-    ;;
-    restart)
-        if [ -f "$PID" ]; then
-            
-            echo "[$DESC] Restarting..."
-            
-            # Stop the service
-            jsvc_exec "-stop"
-            
-            # Start the service
-            jsvc_exec
-            
-            echo " done."
-        else
-            echo "[$DESC] Daemon not running, no action taken"
-            exit 1
-        fi
-            ;;
-    *)
-    echo "Usage: /etc/init.d/$NAME {start|stop|restart}" >&2
-    exit 3
-    ;;
+  start)
+	[ "$VERBOSE" != no ] && log_daemon_msg "Starting $DESC" "$NAME"
+	do_start
+	case "$?" in
+		0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+		2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+	esac
+	;;
+  stop)
+	[ "$VERBOSE" != no ] && log_daemon_msg "Stopping $DESC" "$NAME"
+	do_stop
+	case "$?" in
+		0|1) [ "$VERBOSE" != no ] && log_end_msg 0 ;;
+		2) [ "$VERBOSE" != no ] && log_end_msg 1 ;;
+	esac
+	;;
+  status)
+	status_of_proc "$DAEMON" "$NAME" && exit 0 || exit $?
+	;;
+  #reload|force-reload)
+	#
+	# If do_reload() is not implemented then leave this commented out
+	# and leave 'force-reload' as an alias for 'restart'.
+	#
+	#log_daemon_msg "Reloading $DESC" "$NAME"
+	#do_reload
+	#log_end_msg $?
+	#;;
+  restart|force-reload)
+	#
+	# If the "reload" option is implemented then remove the
+	# 'force-reload' alias
+	#
+	log_daemon_msg "Restarting $DESC" "$NAME"
+	do_stop
+	case "$?" in
+	  0|1)
+		do_start
+		case "$?" in
+			0) log_end_msg 0 ;;
+			1) log_end_msg 1 ;; # Old process is still running
+			*) log_end_msg 1 ;; # Failed to start
+		esac
+		;;
+	  *)
+		# Failed to stop
+		log_end_msg 1
+		;;
+	esac
+	;;
+  *)
+	#echo "Usage: $SCRIPTNAME {start|stop|restart|reload|force-reload}" >&2
+	echo "Usage: $SCRIPTNAME {start|stop|status|restart|force-reload}" >&2
+	exit 3
+	;;
 esac
 
-exit 0
+:

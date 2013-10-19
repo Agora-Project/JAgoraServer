@@ -10,11 +10,9 @@ JAR_FILE := JAgoraServer.jar
 JARFLAGS := cf JAgoraServer.jar
 JAR := jar
 
-DAEMONLIB := commons-daemon-1.0.15.jar
-
 LIB_DIR := lib
 
-CP := $(LIB_DIR)/$(DAEMONLIB)
+CP := ""
 
 SRC_DIR := ./src
 BIN_DIR := ./bin
@@ -27,10 +25,10 @@ MANIFEST_FILE := install/agora.mf
 
 # Libraries and dependencies
 INSTALL_DIR := /usr/lib/agora
-INSTALL_FILES = $(JAR_FILE) $(DAEMONLIB)
+INSTALL_FILES = $(JAR_FILE)
 
 OWNERS := root:root
-PERMISSIONS := u=rwx,g=rx,o=rx
+PERMISSIONS := u=rw,g=r,o=r
 
 # Init script
 AGORA_SCRIPT:=agorad
@@ -48,7 +46,7 @@ INIT_SCRIPT_REMOVE := remove
 
 # Building
 all: classfiles
-	jar cmf $(MANIFEST_FILE) $(LIB_DIR)/$(JAR_FILE) $(BIN_DIR)
+	jar cmf $(MANIFEST_FILE) $(LIB_DIR)/$(JAR_FILE) -C $(BIN_DIR) org
 
 classfiles: bindir
 	$(JC) $(JFLAGS) -d $(BIN_DIR) -cp $(CP) $(JAVA_FILES)
