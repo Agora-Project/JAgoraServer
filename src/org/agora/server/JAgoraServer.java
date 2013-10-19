@@ -27,10 +27,19 @@ public class JAgoraServer {
     this.serverPort = serverPort;
   }
   
-  public void startListening() {
+  public void startServer() {
     try {
       socket = new ServerSocket(serverPort);
+    } catch (IOException e) {
+      Log.error("[JAgoraServer] Failure while creating server socket.");
+      Log.error(e.toString());
+    }
+  }
+  
+  public void listen() {
+    try {
       Socket clientSocket = socket.accept();
+      Log.debug("Received connection from " + clientSocket.getInetAddress());
       InputStream is = clientSocket.getInputStream();
       while(true) {
         int inData = is.read();
@@ -54,7 +63,8 @@ public class JAgoraServer {
     JAgoraServer.InitLogging();
     Log.log("[JAgoraServer] starting.");
     JAgoraServer jas = new JAgoraServer(JAgoraServer.SERVER_PORT);
+    jas.startServer();
     while (true)
-      jas.startListening();
+      jas.listen();
   }
 }

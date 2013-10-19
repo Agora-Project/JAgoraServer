@@ -46,7 +46,7 @@ INIT_SCRIPT_REMOVE := remove
 
 # Building
 all: classfiles
-	jar cmfv $(MANIFEST_FILE) $(LIB_DIR)/$(JAR_FILE) -C $(BIN_DIR) org
+	jar cmf $(MANIFEST_FILE) $(LIB_DIR)/$(JAR_FILE) -C $(BIN_DIR) org
 
 classfiles: bindir
 	$(JC) $(JFLAGS) -d $(BIN_DIR) -cp $(CP) $(JAVA_FILES)
