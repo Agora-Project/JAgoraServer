@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
+import org.agora.server.logging.ConsoleLog;
 import org.agora.server.logging.Log;
 import org.agora.server.logging.FileLog;
 
@@ -75,7 +76,8 @@ public class JAgoraServer {
   public BlockingQueue<Socket> getRequestQueue() { return requestQueue; }
   
   public static void InitLogging() {
-    Log.addLog(new FileLog(Options.LOG_FILE, Options.ERROR_FILE, Options.DEBUG_FILE));
+    //Log.addLog(new FileLog(Options.LOG_FILE, Options.ERROR_FILE, Options.DEBUG_FILE));
+    Log.addLog(new ConsoleLog());
   }
   
   

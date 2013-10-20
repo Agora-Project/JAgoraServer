@@ -36,6 +36,7 @@ public class JAgoraWorker extends Thread {
 
   @Override
   public void run() {
+    Log.log(this + " starting.");
     while(running) {
       try {
         BlockingQueue<Socket> q = server.getRequestQueue();
@@ -47,7 +48,11 @@ public class JAgoraWorker extends Thread {
     }
   }
   
-  
+  /**
+   * The function that handles Agora requests from sockets.
+   * @param clientSocket The socket to serve-
+   * @return Success or failure-
+   */
   public boolean processRequest(Socket clientSocket) {
     boolean success = true;
     
