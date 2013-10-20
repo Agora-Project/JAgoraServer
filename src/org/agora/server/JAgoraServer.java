@@ -1,68 +1,89 @@
 package org.agora.server;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import org.agora.server.logging.Log;
 import org.agora.server.logging.FileLog;
 
 
 public class JAgoraServer {
-  
-  public static int SERVER_PORT = 1597;
 
-  public static String LOG_FILE = "/var/log/agorad.log";
-  public static String ERROR_FILE = "/var/log/agorad.err";
-  public static String DEBUG_FILE = "/var/log/agorad.dbg";
   
-  
-  
-  protected int serverPort;
-  
+  /**
+   * Socket on which the server is listening.
+   */
   protected ServerSocket socket;
   
-  public JAgoraServer(int serverPort) {
-    this.serverPort = serverPort;
+  /**
+   * When connections are opened, they are stored here. Worker threads grab'em
+   * and process'em.
+   */
+  protected BlockingQueue<Socket> requestQueue;
+  
+  protected List<JAgoraWorker> workers;
+  
+  
+  
+  public JAgoraServer() {
+    requestQueue = new LinkedBlockingQueue<Socket>();
+    workers = new LinkedList<JAgoraWorker>();
   }
   
+  /**
+   * Creates and binds the server socket. Also spawns worker threads.
+   */
   public void startServer() {
+    // Bind server socket.
     try {
-      socket = new ServerSocket(serverPort);
+      socket = new ServerSocket(Options.LISTEN_PORT);
     } catch (IOException e) {
-      Log.error("[JAgoraServer] Failure while creating server socket.");
+      Log.error("Failure while creating server socket.");
       Log.error(e.toString());
     }
+    
+    // Start threads.
+    for (int i = 0; i < Options.NUM_WORKERS; i++) {
+      JAgoraWorker jaw = new JAgoraWorker(this);
+      workers.add(jaw);
+      jaw.start();
+    }
+    
   }
   
   public void listen() {
     try {
       Socket clientSocket = socket.accept();
       Log.debug("Received connection from " + clientSocket.getInetAddress());
-      InputStream is = clientSocket.getInputStream();
-      while(true) {
-        int inData = is.read();
-        if (inData < 0)
-          break;
-        clientSocket.getOutputStream().write(inData);
-        clientSocket.getOutputStream().flush();
-      }
-      clientSocket.close();
+      if (!requestQueue.offer(clientSocket))
+        System.err.println("Could not add client socket to request queue.");
     } catch (IOException e) {
-      Log.error("[JAgoraServer] Failure while listening to sockets.");
+      Log.error("Failure while listening to sockets.");
       Log.error(e.toString());
     }
   }
   
-  public static void InitLogging() {
-    Log.addLog(new FileLog(LOG_FILE, ERROR_FILE, DEBUG_FILE));
+  public void stopServer() {
+    
   }
+  
+  public BlockingQueue<Socket> getRequestQueue() { return requestQueue; }
+  
+  public static void InitLogging() {
+    Log.addLog(new FileLog(Options.LOG_FILE, Options.ERROR_FILE, Options.DEBUG_FILE));
+  }
+  
+  
   
   public static void main(String[] args) {
     JAgoraServer.InitLogging();
     Log.log("[JAgoraServer] starting.");
-    JAgoraServer jas = new JAgoraServer(JAgoraServer.SERVER_PORT);
+    JAgoraServer jas = new JAgoraServer();
     jas.startServer();
     while (true)
       jas.listen();
