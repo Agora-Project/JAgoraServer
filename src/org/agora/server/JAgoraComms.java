@@ -4,68 +4,28 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.Socket;
 
+import org.agora.graph.Graph;
+import org.agora.graph.Node;
+import org.agora.graph.Edge;
+import org.agora.graph.NodeID;
 import org.agora.server.logging.Log;
 import org.bson.BSONDecoder;
+import org.bson.BSONEncoder;
 import org.bson.BSONObject;
 import org.bson.BasicBSONDecoder;
+import org.bson.BasicBSONEncoder;
+import org.bson.BasicBSONObject;
+import org.bson.types.BasicBSONList;
 
 public class JAgoraComms {
-
-  
-  public static int toInt(InputStream is) throws IOException {
-    byte ch1 = (byte)is.read();
-    byte ch2 = (byte)is.read();
-    byte ch3 = (byte)is.read();
-    byte ch4 = (byte)is.read();
-    if ((ch1 | ch2 | ch3 | ch4) < 0)
-      throw new IOException();
-    return toInt(new byte[]{ch1, ch2, ch3, ch4});
-  }
-  
-  /**
-   * Assumes something about endian-ness.
-   * @param b
-   * @return
-   */
-  public static int toInt(byte[] b) {
-    // TODO: This assumes something about endian-ness. It should be in the
-    //       official protocol at some point.
-    return ((b[0] << 24) + (b[1] << 16) + (b[2] << 8) + (b[3] << 0));  
-  }
-  
-  /**
-   * Returns the required number of bytes to deserialise the BSON object.
-   * @param is The input stream from the client socket
-   * @param length length of the BSON serialisation
-   * @return The BSON serialisation
-   * @throws IOException
-   */
-  public static byte[] readArray(InputStream is, int length) throws IOException {
-    byte[] result = new byte[length];
-    int startByte = 0;
-    int toGo = length;
-    while (toGo > 0) {
-      int read = is.read(result, startByte, toGo);
-      toGo -= read;
-      startByte += read;
-    }
-    return result;
-  }
   
   
-  public static BSONObject readBSONFromSocket(Socket s) {
+  public static BSONObject readBSONObjectFromSocket(Socket s) {
     try {
       InputStream is = s.getInputStream();
-      int size = toInt(is); // Read size of BSON object serialisation
-      if (size > Options.MAX_INCOMING_BSON_SIZE)
-        throw new IOException("Incoming file too large!");
-      
-      // Read object
-      byte[] bsonSerialised = readArray(is, size);
       BSONDecoder bdec = new BasicBSONDecoder();
-      //bdec.
-      
-      
+      BSONObject bson = bdec.readObject(is);
+      return bson;
     } catch (IOException e) {
       Log.error("Could not read BSON object from socket " + s);
       Log.error(e.getMessage());
@@ -75,4 +35,69 @@ public class JAgoraComms {
   }
   
   
+  public static boolean writeBSONObjectToSocket(Socket s, BSONObject bson) {
+    BSONEncoder benc = new BasicBSONEncoder();
+    byte[] b = benc.encode(bson);
+    
+    try {
+      s.getOutputStream().write(b);
+      return true;
+    } catch (IOException e) {
+      Log.error("Could not write BSON object to socket " + s);
+      Log.error(e.getMessage());
+    }
+    
+    return false;
+  }
+  
+  public static BSONObject BSONiseNodeID(NodeID nodeID) {
+    BSONObject bson = new BasicBSONObject();
+    bson.put("source", nodeID.getSource());
+    bson.put("id", nodeID.getNumber());
+  }
+  
+  public static BSONObject BSONiseNode(Node node) {
+    BSONObject bson = new BasicBSONObject();
+    bson.put("id", BSONiseNodeID(node.getID()));
+    bson.put("posterName", node.posterName);
+    bson.put("posterID", node.posterID);
+    bson.put("date", node.date.toString());
+    bson.put("acceptability", node.acceptability);
+    bson.put("threadID", node.threadID);
+    return bson;
+  }
+  
+  public static BSONObject BSONiseEdge(Edge edge) {
+    BSONObject bson = new BasicBSONObject();
+    bson.put("origin", BSONiseNodeID(edge.getOrigin().getID()));
+    bson.put("target", BSONiseNodeID(edge.getTarget().getID()));
+    return bson;
+  }
+  
+  public static BSONObject BSONiseGraph(Graph graph) {
+    BSONObject bsonGraph = new BasicBSONObject();
+    
+    // Add nodes.
+    BasicBSONList bsonNodeList = new BasicBSONList();
+    Node[] nodes = graph.getNodes();
+    for (int i = 0; i < nodes.length; i++) {
+      bsonNodeList.add(BSONiseNode(nodes[i]));
+    }
+    
+    bsonGraph.put("nodes", bsonNodeList);
+    
+    // Add edges.
+    BasicBSONList bsonEdgeList = new BasicBSONList();
+    for (Edge e: graph.edgeMap.values()) {
+      bsonNodeList.add(BSONiseEdge(e));
+    }
+    
+    bsonGraph.put("edges", bsonEdgeList);
+    
+    return bsonGraph;
+  }
 }
+
+
+
+

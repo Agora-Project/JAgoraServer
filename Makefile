@@ -2,7 +2,8 @@ INSTALLATION := $(`pwd`)
 
 # COMPILATION
 
-JFLAGS := -g:none
+#JFLAGS := -g:none
+JFLAGS := 
 JC := javac
 
 JAR_FILE := JAgoraServer.jar
@@ -11,8 +12,10 @@ JARFLAGS := cf JAgoraServer.jar
 JAR := jar
 
 LIB_DIR := lib
+MONGO_LIB := mongo-java-driver-2.11.3.jar
 
-CP := ""
+
+CP := $(LIB_DIR)/$(MONGO_LIB)
 
 SRC_DIR := ./src
 BIN_DIR := ./bin

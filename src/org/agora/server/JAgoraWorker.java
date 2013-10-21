@@ -5,6 +5,7 @@ import java.util.concurrent.TimeUnit;
 import java.net.Socket;
 
 import org.agora.server.logging.Log;
+import org.bson.BSONObject;
 
 public class JAgoraWorker extends Thread {
   
@@ -41,7 +42,7 @@ public class JAgoraWorker extends Thread {
       try {
         BlockingQueue<Socket> q = server.getRequestQueue();
         Socket clientSocket = q.poll(Options.REQUEST_WAIT, TimeUnit.MILLISECONDS);
-        processRequest(clientSocket);
+        processSocketRequest(clientSocket);
       } catch (InterruptedException e) {
         Log.log(toString() + " was interrupted.");
       }
@@ -53,10 +54,21 @@ public class JAgoraWorker extends Thread {
    * @param clientSocket The socket to serve-
    * @return Success or failure-
    */
-  public boolean processRequest(Socket clientSocket) {
-    boolean success = true;
+  public boolean processSocketRequest(Socket clientSocket) {
+    BSONObject request = JAgoraComms.readBSONObjectFromSocket(clientSocket);
+    if (request == null)
+      return false;
     
-    return success;
+    BSONObject response = processBSONRequest(request);
+    if (response == null)
+      return false;
+    
+    return JAgoraComms.writeBSONObjectToSocket(clientSocket, response);
+  }
+  
+  public BSONObject processBSONRequest(BSONObject request) {
+    // TODO: implement!
+    return null;
   }
   
   @Override
