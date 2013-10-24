@@ -5,7 +5,6 @@ import java.util.concurrent.TimeUnit;
 import java.net.Socket;
 
 import org.agora.lib.JAgoraComms;
-import org.agora.lib.JAgoraLib;
 import org.agora.logging.Log;
 import org.bson.BSONObject;
 
@@ -69,7 +68,7 @@ public class JAgoraWorker extends Thread {
   }
   
   public BSONObject processBSONRequest(BSONObject request) {
-    int requestType = (int)request.get("action");
+    int requestType = (Integer)request.get("action");
     switch (requestType) {
     case JAgoraComms.LOGIN_ACTION:
       // TODO: implement
