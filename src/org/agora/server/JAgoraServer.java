@@ -8,9 +8,8 @@ import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
-import org.agora.server.logging.ConsoleLog;
-import org.agora.server.logging.Log;
-import org.agora.server.logging.FileLog;
+import org.agora.logging.ConsoleLog;
+import org.agora.logging.Log;
 
 
 public class JAgoraServer {
@@ -42,7 +41,7 @@ public class JAgoraServer {
   public void startServer() {
     // Bind server socket.
     try {
-      socket = new ServerSocket(Options.LISTEN_PORT);
+      socket = new ServerSocket(org.agora.lib.Options.AGORA_PORT);
     } catch (IOException e) {
       Log.error("Failure while creating server socket.");
       Log.error(e.toString());

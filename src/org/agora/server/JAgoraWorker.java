@@ -4,7 +4,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.net.Socket;
 
-import org.agora.server.logging.Log;
+import org.agora.lib.JAgoraComms;
+import org.agora.lib.JAgoraLib;
+import org.agora.logging.Log;
 import org.bson.BSONObject;
 
 public class JAgoraWorker extends Thread {
@@ -67,7 +69,15 @@ public class JAgoraWorker extends Thread {
   }
   
   public BSONObject processBSONRequest(BSONObject request) {
-    // TODO: implement!
+    int requestType = (int)request.get("action");
+    switch (requestType) {
+    case JAgoraComms.LOGIN_ACTION:
+      // TODO: implement
+      break;
+    case JAgoraComms.LOGOUT_ACTION:
+      // TODO: implement
+      break;
+    }
     return null;
   }
   

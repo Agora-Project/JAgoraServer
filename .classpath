@@ -4,5 +4,6 @@
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
 	<classpathentry kind="lib" path="lib/mongo-java-driver-2.11.3.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/JAgoraGraph"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/JAgoraLib"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
