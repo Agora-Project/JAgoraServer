@@ -5,6 +5,12 @@ public class Options {
   // Server configuration
   public static int NUM_WORKERS = 4;
   public static int MAX_INCOMING_BSON_SIZE = 10*1024; // 10kb?
+  
+  // Database information
+  public static String DB_FILE = "database.conf";
+  public static String DB_URL = null;
+  public static String DB_USER = null;
+  public static String DB_PASS = null;
 
   // Worker configuration
   public static long REQUEST_WAIT = 1000;

@@ -5,5 +5,6 @@
 	<classpathentry kind="lib" path="lib/mongo-java-driver-2.11.3.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/JAgoraGraph"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/JAgoraLib"/>
+	<classpathentry kind="lib" path="lib/commons-codec-1.8.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

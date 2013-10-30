@@ -1,15 +1,21 @@
 package org.agora.server;
 
+import java.io.File;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Scanner;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 
 import org.agora.logging.ConsoleLog;
 import org.agora.logging.Log;
+
+import com.mongodb.DBObject;
+import com.mongodb.util.JSON;
 
 
 public class JAgoraServer {
@@ -26,7 +32,12 @@ public class JAgoraServer {
    */
   protected BlockingQueue<Socket> requestQueue;
   
+  /**
+   * Worker threads.
+   */
   protected List<JAgoraWorker> workers;
+  
+  
   
   
   
@@ -72,11 +83,46 @@ public class JAgoraServer {
     
   }
   
+  /**
+   * Attempts to create a new database connection.
+   * @return
+   */
+  public DatabaseConnection createDatabaseConnection() {
+    DatabaseConnection dbc = new DatabaseConnection(Options.DB_URL,
+                                                    Options.DB_USER,
+                                                    Options.DB_PASS);
+    boolean connected = dbc.open();
+    if(!connected) {
+      Log.error("[JAgoraServer] Could not initiate connection to database.");
+      return null;
+    }
+    
+    return dbc;
+  }
+  
+  
   public BlockingQueue<Socket> getRequestQueue() { return requestQueue; }
   
   public static void InitLogging() {
     //Log.addLog(new FileLog(Options.LOG_FILE, Options.ERROR_FILE, Options.DEBUG_FILE));
     Log.addLog(new ConsoleLog());
+  }
+  
+  public void readDBConfFromFile(String file) {
+    String json;
+    try {
+      Scanner s = new Scanner(new File(file));
+      json = s.useDelimiter("\\A").next();
+      s.close();
+    } catch (FileNotFoundException e) {
+      Log.error("[JAgoraServer] Could not find configuration file " + file);
+      return;
+    }
+    
+    DBObject bson = (DBObject) JSON.parse(json);
+    Options.DB_URL = (String) bson.get("url");
+    Options.DB_USER = (String) bson.get("user");
+    Options.DB_PASS = (String) bson.get("pass");
   }
   
   
@@ -85,6 +131,7 @@ public class JAgoraServer {
     JAgoraServer.InitLogging();
     Log.log("[JAgoraServer] starting.");
     JAgoraServer jas = new JAgoraServer();
+    jas.readDBConfFromFile(Options.DB_FILE);
     jas.startServer();
     while (true)
       jas.listen();

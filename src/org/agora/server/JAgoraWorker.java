@@ -6,7 +6,7 @@ import java.net.Socket;
 
 import org.agora.lib.JAgoraComms;
 import org.agora.logging.Log;
-import org.bson.BSONObject;
+import org.bson.BasicBSONObject;
 
 public class JAgoraWorker extends Thread {
   
@@ -52,22 +52,22 @@ public class JAgoraWorker extends Thread {
   
   /**
    * The function that handles Agora requests from sockets.
-   * @param clientSocket The socket to serve-
+   * @param clientSocket The socket to serve
    * @return Success or failure-
    */
   public boolean processSocketRequest(Socket clientSocket) {
-    BSONObject request = JAgoraComms.readBSONObjectFromSocket(clientSocket);
+    BasicBSONObject request = JAgoraComms.readBSONObjectFromSocket(clientSocket);
     if (request == null)
       return false;
     
-    BSONObject response = processBSONRequest(request);
+    BasicBSONObject response = processBSONRequest(request);
     if (response == null)
       return false;
     
     return JAgoraComms.writeBSONObjectToSocket(clientSocket, response);
   }
   
-  public BSONObject processBSONRequest(BSONObject request) {
+  public BasicBSONObject processBSONRequest(BasicBSONObject request) {
     int requestType = (Integer)request.get("action");
     switch (requestType) {
     case JAgoraComms.LOGIN_ACTION:
