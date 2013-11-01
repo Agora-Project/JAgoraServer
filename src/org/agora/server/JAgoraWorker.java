@@ -4,8 +4,9 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.net.Socket;
 
-import org.agora.lib.JAgoraComms;
+import org.agora.lib.*;
 import org.agora.logging.Log;
+import org.agora.server.queries.*;
 import org.bson.BasicBSONObject;
 
 public class JAgoraWorker extends Thread {
@@ -43,7 +44,8 @@ public class JAgoraWorker extends Thread {
       try {
         BlockingQueue<Socket> q = server.getRequestQueue();
         Socket clientSocket = q.poll(Options.REQUEST_WAIT, TimeUnit.MILLISECONDS);
-        processSocketRequest(clientSocket);
+        if (clientSocket != null)
+          processSocketRequest(clientSocket);
       } catch (InterruptedException e) {
         Log.log(toString() + " was interrupted.");
       }
@@ -69,15 +71,10 @@ public class JAgoraWorker extends Thread {
   
   public BasicBSONObject processBSONRequest(BasicBSONObject request) {
     int requestType = (Integer)request.get("action");
-    switch (requestType) {
-    case JAgoraComms.LOGIN_ACTION:
-      // TODO: implement
-      break;
-    case JAgoraComms.LOGOUT_ACTION:
-      // TODO: implement
-      break;
-    }
-    return null;
+    QueryResponder r = server.getResponder(requestType);
+    if (r == null)
+      return null;
+    return r.respond(request, server);
   }
   
   @Override

@@ -5,12 +5,11 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Scanner;
-import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.*;
+import java.util.concurrent.*;
 
+import org.agora.server.queries.*;
+import org.agora.lib.*;
 import org.agora.logging.ConsoleLog;
 import org.agora.logging.Log;
 
@@ -20,6 +19,10 @@ import com.mongodb.util.JSON;
 
 public class JAgoraServer {
 
+  /**
+   * Random number generator.
+   */
+  protected Random rand;
   
   /**
    * Socket on which the server is listening.
@@ -37,13 +40,39 @@ public class JAgoraServer {
    */
   protected List<JAgoraWorker> workers;
   
+  /**
+   * Query responders for the different kinds of requests.
+   */
+  protected Map<Integer, QueryResponder> responders;
+  // TODO: the above can probably become a plain old QueryResponder[]
+  //       if we're careful. That's a future optimisation.
   
-  
-  
+  /**
+   * Session map
+   */
+  protected ConcurrentMap<Integer, UserSession> sessions;
   
   public JAgoraServer() {
+    rand = new Random();
     requestQueue = new LinkedBlockingQueue<Socket>();
     workers = new LinkedList<JAgoraWorker>();
+    sessions = new ConcurrentHashMap<Integer, UserSession>();
+    initialiseResponders();
+  }
+  
+  /**
+   * Fills the responders map and makes sure that there is
+   * a query responder for all possible queries.
+   */
+  protected void initialiseResponders() {
+    responders = new HashMap<Integer, QueryResponder>();
+    responders.put(IJAgoraLib.LOGIN_ACTION, new LoginResponder());
+  }
+  
+  public QueryResponder getResponder(int operation) {
+    if (!responders.containsKey(operation))
+      return null;
+    return responders.get(operation);
   }
   
   /**
@@ -80,7 +109,7 @@ public class JAgoraServer {
   }
   
   public void stopServer() {
-    
+    Log.log("[JAgoraServer] Shutting down server.");
   }
   
   /**
@@ -100,6 +129,20 @@ public class JAgoraServer {
     return dbc;
   }
   
+  /**
+   * Initiates login and session management for the given user.
+   * @param user The username
+   * @param userID The userID (from the DB)
+   * @return The new UserSession 
+   */
+  public UserSession userLogin(String user, int userID) {
+    byte[] sessBytes = new byte[Options.SESSION_BYTE_LENGTH];
+    rand.nextBytes(sessBytes);
+    String sessionID = Util.bytesToHex(sessBytes);
+    UserSession session = new UserSession(user, userID, sessionID);
+    sessions.put(userID, session);
+    return session;
+  }
   
   public BlockingQueue<Socket> getRequestQueue() { return requestQueue; }
   
@@ -136,4 +179,5 @@ public class JAgoraServer {
     while (true)
       jas.listen();
   }
+
 }

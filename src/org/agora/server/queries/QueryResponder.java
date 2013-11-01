@@ -1,8 +1,8 @@
 package org.agora.server.queries;
 
 import org.agora.server.JAgoraServer;
-import org.bson.BSONObject;
+import org.bson.BasicBSONObject;
 
 public interface QueryResponder {
-  BSONObject respond(BSONObject query, JAgoraServer server);
+  BasicBSONObject respond(BasicBSONObject query, JAgoraServer server);
 }

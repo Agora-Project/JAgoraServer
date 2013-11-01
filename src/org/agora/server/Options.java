@@ -6,6 +6,8 @@ public class Options {
   public static int NUM_WORKERS = 4;
   public static int MAX_INCOMING_BSON_SIZE = 10*1024; // 10kb?
   
+  public static int SESSION_BYTE_LENGTH = 8;
+  
   // Database information
   public static String DB_FILE = "database.conf";
   public static String DB_URL = null;
