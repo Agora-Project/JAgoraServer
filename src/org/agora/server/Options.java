@@ -27,5 +27,9 @@ public class Options {
   public static String ERROR_FILE = "/var/log/agorad.err";
   public static String DEBUG_FILE = "/var/log/agorad.dbg";
   
-  
+  public static void parseOptions(String[] args) {
+    // TODO: hacked
+    if(args[0].equals("-db"))
+      DB_FILE = args[1];
+  }
 }

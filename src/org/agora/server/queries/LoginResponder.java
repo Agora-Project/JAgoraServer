@@ -13,51 +13,51 @@ public class LoginResponder implements QueryResponder {
   
   @Override
   public BasicBSONObject respond(BasicBSONObject query, JAgoraServer server) {
-    BasicBSONObject bson = new BasicBSONObject();
+    BasicBSONObject bsonResponse = new BasicBSONObject();
     
     try (DatabaseConnection dbc = server.createDatabaseConnection()) {
       if (dbc == null) {
         Log.error("[LoginResponder] Could not connect to database.");
-        bson.put("response", IJAgoraLib.SERVER_FAIL);
-        bson.put("reason", "Server failure.");
-        return bson;
+        bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
+        bsonResponse.put(IJAgoraLib.REASON_FIELD, "Server failure.");
+        return bsonResponse;
       }
       
       // TODO: password is already hashed?
-      String user = (String) query.get("user");
-      String pass = (String) query.get("pass");
+      String user = query.getString(IJAgoraLib.USER_FIELD);
+      String pass = query.getString(IJAgoraLib.PASSWORD_FIELD);
       
       Statement s = dbc.produceStatement();
       if (s == null) {
         Log.error("[LoginResponder] Could not create statement.");
-        bson.put("response", IJAgoraLib.SERVER_FAIL);
-        bson.put("reason", "Server failure.");
-        return bson;
+        bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
+        bsonResponse.put(IJAgoraLib.REASON_FIELD, "Server failure.");
+        return bsonResponse;
       }
       //TODO: input sanitisation
       String strQuery = "SELECT user_ID FROM users WHERE " + 
           "username = '" + user + "' AND " + 
           "password = '" + pass + "';";
       ResultSet rs = s.executeQuery(strQuery);
+
       
       boolean logged = rs.next();
       
       if (logged) {
         UserSession session = server.userLogin(user, rs.getInt("user_ID"));
-        bson.put("response", IJAgoraLib.SERVER_OK);
-        bson.put("token", session.getToken());
-        bson.put("id", session.getUserID());
+        bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_OK);
+        bsonResponse.put(IJAgoraLib.SESSION_ID_FIELD, session.getSessionID());
+        bsonResponse.put(IJAgoraLib.USER_ID_FIELD, session.getUserID());
       } else {
-        bson.put("response", IJAgoraLib.SERVER_FAIL);
-        bson.put("reason", "Wrong username/password.");
+        bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
+        bsonResponse.put(IJAgoraLib.REASON_FIELD, "Wrong username/password.");
       }
-      return bson;
+      return bsonResponse;
     } catch (SQLException e) {
-      Log.error("[LoginResponder] Could not execute query.");
-      Log.error(e.getMessage());
-      bson.put("response", IJAgoraLib.SERVER_FAIL);
-      bson.put("reason", "Server failure.");
-      return bson;
+      Log.error("[LoginResponder] Could not execute query ("+e.getMessage()+")");
+      bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
+      bsonResponse.put(IJAgoraLib.REASON_FIELD, "Server failure.");
+      return bsonResponse;
     }
   }
 

@@ -4,12 +4,12 @@ public class UserSession {
 
   protected String username;
   protected int userID;
-  protected String token;
+  protected String sessionID;
   
-  public UserSession(String username, int userID, String token) {
+  public UserSession(String username, int userID, String sessionID) {
     this.username = username;
     this.userID = userID;
-    this.token = token;
+    this.sessionID = sessionID;
   }
 
   @Override
@@ -36,5 +36,5 @@ public class UserSession {
 
   public String getUsername() { return username; }
   public int getUserID() { return userID; }
-  public String getToken() { return token; }
+  public String getSessionID() { return sessionID; }
 }

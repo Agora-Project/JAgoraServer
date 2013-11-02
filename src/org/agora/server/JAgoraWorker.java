@@ -70,10 +70,14 @@ public class JAgoraWorker extends Thread {
   }
   
   public BasicBSONObject processBSONRequest(BasicBSONObject request) {
-    int requestType = (Integer)request.get("action");
+    int requestType = (Integer)request.get(IJAgoraLib.ACTION_FIELD);
     QueryResponder r = server.getResponder(requestType);
-    if (r == null)
-      return null;
+    if (r == null) {
+      BasicBSONObject response = new BasicBSONObject();
+      response.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
+      response.put(IJAgoraLib.REASON_FIELD, "Cannot handle this request.");
+      return response;
+    }
     return r.respond(request, server);
   }
   

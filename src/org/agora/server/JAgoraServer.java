@@ -67,6 +67,7 @@ public class JAgoraServer {
   protected void initialiseResponders() {
     responders = new HashMap<Integer, QueryResponder>();
     responders.put(IJAgoraLib.LOGIN_ACTION, new LoginResponder());
+    responders.put(IJAgoraLib.LOGOUT_ACTION, new LogoutResponder());
   }
   
   public QueryResponder getResponder(int operation) {
@@ -144,6 +145,24 @@ public class JAgoraServer {
     return session;
   }
   
+  public UserSession getSession(int userID) {
+    if (!sessions.containsKey(userID))
+      return null;
+    return sessions.get(userID);
+  }
+  
+  public boolean verifySession(int userID, String sessionID) {
+    UserSession us = getSession(userID);
+    if (us == null)
+      return false;
+    
+    return us.getSessionID().equals(sessionID);
+  }
+  
+  public boolean logoutUser(int userID) {
+    return sessions.remove(userID) != null;
+  }
+  
   public BlockingQueue<Socket> getRequestQueue() { return requestQueue; }
   
   public static void InitLogging() {
@@ -173,6 +192,9 @@ public class JAgoraServer {
   public static void main(String[] args) {
     JAgoraServer.InitLogging();
     Log.log("[JAgoraServer] starting.");
+    
+    Options.parseOptions(args);
+    
     JAgoraServer jas = new JAgoraServer();
     jas.readDBConfFromFile(Options.DB_FILE);
     jas.startServer();
