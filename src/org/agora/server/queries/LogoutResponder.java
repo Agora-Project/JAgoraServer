@@ -10,17 +10,15 @@ public class LogoutResponder implements QueryResponder {
   public BasicBSONObject respond(BasicBSONObject query, JAgoraServer server) {
     BasicBSONObject bsonResponse = new BasicBSONObject();
     
-    int userID = query.getInt(IJAgoraLib.USER_ID_FIELD);
-    String sessionID = query.getString(IJAgoraLib.SESSION_ID_FIELD);
-    
-    boolean verified = server.verifySession(userID, sessionID);
+    boolean verified = server.verifySession(query);
     
     if (!verified) {
       bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
       bsonResponse.put(IJAgoraLib.REASON_FIELD, "Invalid session ID.");
+      return bsonResponse;
     }
     
-    server.logoutUser(userID);
+    server.logoutUser(query.getInt(IJAgoraLib.USER_ID_FIELD));
     bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_OK);
     
     return bsonResponse;

@@ -12,6 +12,7 @@ import org.agora.server.queries.*;
 import org.agora.lib.*;
 import org.agora.logging.ConsoleLog;
 import org.agora.logging.Log;
+import org.bson.BasicBSONObject;
 
 import com.mongodb.DBObject;
 import com.mongodb.util.JSON;
@@ -158,6 +159,18 @@ public class JAgoraServer {
     
     return us.getSessionID().equals(sessionID);
   }
+ 
+  public boolean verifySession(BasicBSONObject query) {
+    int userID = query.getInt(IJAgoraLib.USER_ID_FIELD);
+    String sessionID = query.getString(IJAgoraLib.SESSION_ID_FIELD);
+    
+    UserSession us = getSession(userID);
+    if (us == null)
+      return false;
+    
+    return us.getSessionID().equals(sessionID);
+  }
+  
   
   public boolean logoutUser(int userID) {
     return sessions.remove(userID) != null;

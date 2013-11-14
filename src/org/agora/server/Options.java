@@ -29,7 +29,8 @@ public class Options {
   
   public static void parseOptions(String[] args) {
     // TODO: hacked
-    if(args[0].equals("-db"))
-      DB_FILE = args[1];
+    if(args.length > 0)
+      if(args[0].equals("-db"))
+        DB_FILE = args[1];
   }
 }
