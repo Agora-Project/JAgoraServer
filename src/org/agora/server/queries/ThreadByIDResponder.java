@@ -45,7 +45,18 @@ public class ThreadByIDResponder implements QueryResponder {
       }
       
       // Grab graph from DB.
+      DBGraphDecoder dgd = new DBGraphDecoder();
+      dgd.loadGraphByThreadID(s, threadID);
       
+      JAgoraGraph graph = dgd.getGraph();
+      
+      // Encode graph into BSON
+      BSONGraphEncoder enc = new BSONGraphEncoder();
+      BasicBSONObject bsonGraph = enc.BSONiseGraph(graph);
+      
+      // Add it to the response
+      bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_OK);
+      bsonResponse.put(IJAgoraLib.GRAPH_FIELD, bsonGraph);
       
     } catch (SQLException e) {
       Log.error("[ThreadByIDResponder] Could not execute query ("+e.getMessage()+")");
@@ -53,25 +64,7 @@ public class ThreadByIDResponder implements QueryResponder {
       bsonResponse.put(IJAgoraLib.REASON_FIELD, "Server failure.");
       return bsonResponse;
     }
+    
+    return null;
   }
-
-  
-  protected JAgoraGraph loadGraphFromDatabase(DatabaseConnection dbc, int threadID) throws SQLException {
-    DBGraphDecoder dbgd = new DBGraphDecoder();
-    
-    Statement s = dbc.produceStatement();
-    
-    ResultSet rs = s.executeQuery("SELECT source_ID, arg_ID FROM arguments WHERE thread_ID='"+threadID+"';");
-    dbgd.loadNodesFromResultSet(rs);
-    
-    // TODO: use a PreparedStatement of the form "SELECT * FROM attacks WHERE 
-    //       origin = ?" to iteratively grab all of the the relevant attacks.
-    //       CAREFUL with duplicates!
-    //       An alternative would be to join the argument & attack tables first
-    //       with the defender nodes, and then with the attacker nodes where the
-    //       thread ID of the attacker/defender is the given one
-    
-    return dbgd.getGraph();
-  }
-  
 }
