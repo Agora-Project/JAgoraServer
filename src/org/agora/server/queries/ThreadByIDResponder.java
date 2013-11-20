@@ -36,8 +36,6 @@ public class ThreadByIDResponder implements QueryResponder {
         return bsonResponse;
       }
       
-      
-      
       Statement s = dbc.produceStatement();
       if (s == null) {
         Log.error("[ThreadByIDResponder] Could not create statement.");
@@ -45,25 +43,10 @@ public class ThreadByIDResponder implements QueryResponder {
         bsonResponse.put(IJAgoraLib.REASON_FIELD, "Server failure.");
         return bsonResponse;
       }
-      //TODO: input sanitisation
-      String strQuery = "SELECT user_ID FROM users WHERE " + 
-          "username = '" + user + "' AND " + 
-          "password = '" + pass + "';";
-      ResultSet rs = s.executeQuery(strQuery);
-
       
-      boolean logged = rs.next();
+      // Grab graph from DB.
       
-      if (logged) {
-        UserSession session = server.userLogin(user, rs.getInt("user_ID"));
-        bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_OK);
-        bsonResponse.put(IJAgoraLib.SESSION_ID_FIELD, session.getSessionID());
-        bsonResponse.put(IJAgoraLib.USER_ID_FIELD, session.getUserID());
-      } else {
-        bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
-        bsonResponse.put(IJAgoraLib.REASON_FIELD, "Wrong username/password.");
-      }
-      return bsonResponse;
+      
     } catch (SQLException e) {
       Log.error("[ThreadByIDResponder] Could not execute query ("+e.getMessage()+")");
       bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
