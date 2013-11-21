@@ -3,6 +3,7 @@ package org.agora.server.database;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Date;
 
 import org.agora.graph.JAgoraEdge;
 import org.agora.graph.JAgoraGraph;
@@ -88,7 +89,7 @@ public class DBGraphDecoder {
     node.setContent(contentBSON);
     
     // Other stuff
-    node.setDate(rs.getDate("date"));
+    node.setDate(new Date(rs.getTimestamp("date").getTime()));
     node.setAcceptability(rs.getBigDecimal("acceptability"));
     node.setThreadID(rs.getInt("thread_ID"));
     node.setPosterID(rs.getInt("poster_ID"));

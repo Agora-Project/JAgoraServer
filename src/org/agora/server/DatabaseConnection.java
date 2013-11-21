@@ -99,6 +99,17 @@ public class DatabaseConnection implements java.lang.AutoCloseable {
     return null;
   }
   
+  public boolean commit() {
+    try {
+      c.commit();
+      return true;
+    } catch (SQLException e) {
+      Log.error("[DatabaseConnection] Could not commit.");
+      return false;
+    }
+  }
+  
+  // TODO: this is gross, right?
   protected boolean fail() { successState = false; return false; } 
   public boolean isConnected() { return c != null; }
 }

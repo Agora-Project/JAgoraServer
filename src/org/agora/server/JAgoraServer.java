@@ -59,6 +59,13 @@ public class JAgoraServer {
     workers = new LinkedList<JAgoraWorker>();
     sessions = new ConcurrentHashMap<Integer, UserSession>();
     initialiseResponders();
+    
+    readConfigurationFiles();
+  }
+  
+  protected void readConfigurationFiles() {
+    readDBConfFromFile();
+    readAgoraConfFromFile();
   }
   
   /**
@@ -70,6 +77,7 @@ public class JAgoraServer {
     responders.put(IJAgoraLib.LOGIN_ACTION, new LoginResponder());
     responders.put(IJAgoraLib.LOGOUT_ACTION, new LogoutResponder());
     responders.put(IJAgoraLib.QUERY_BY_THREAD_ID_ACTION, new ThreadByIDResponder());
+    responders.put(IJAgoraLib.ADD_ARGUMENT_ACTION, new AddArgumentResponder());
   }
   
   public QueryResponder getResponder(int operation) {
@@ -79,9 +87,17 @@ public class JAgoraServer {
   }
   
   /**
+   * Starts the server and runs it.
+   */
+  public void run() {
+    startServer();
+    mainLoop();
+  }
+  
+  /**
    * Creates and binds the server socket. Also spawns worker threads.
    */
-  public void startServer() {
+  protected void startServer() {
     // Bind server socket.
     try {
       socket = new ServerSocket(org.agora.lib.Options.AGORA_PORT);
@@ -96,18 +112,20 @@ public class JAgoraServer {
       workers.add(jaw);
       jaw.start();
     }
-    
   }
   
-  public void listen() {
-    try {
-      Socket clientSocket = socket.accept();
-      Log.debug("Received connection from " + clientSocket.getInetAddress());
-      if (!requestQueue.offer(clientSocket))
-        System.err.println("Could not add client socket to request queue.");
-    } catch (IOException e) {
-      Log.error("Failure while listening to sockets.");
-      Log.error(e.toString());
+  
+  protected void mainLoop() {
+    while(true) {
+      try {
+        Socket clientSocket = socket.accept();
+        Log.debug("Received connection from " + clientSocket.getInetAddress());
+        if (!requestQueue.offer(clientSocket))
+          System.err.println("Could not add client socket to request queue.");
+      } catch (IOException e) {
+        Log.error("Failure while listening to sockets.");
+        Log.error(e.toString());
+      }
     }
   }
   
@@ -184,7 +202,8 @@ public class JAgoraServer {
     Log.addLog(new ConsoleLog());
   }
   
-  public void readDBConfFromFile(String file) {
+  public void readAgoraConfFromFile() { readAgoraConfFromFile(Options.CONF_FILE); }
+  public void readAgoraConfFromFile(String file) {
     String json;
     try {
       Scanner s = new Scanner(new File(file));
@@ -192,6 +211,22 @@ public class JAgoraServer {
       s.close();
     } catch (FileNotFoundException e) {
       Log.error("[JAgoraServer] Could not find configuration file " + file);
+      return;
+    }
+    
+    DBObject bson = (DBObject) JSON.parse(json);
+    Options.SERVER_URL = (String) bson.get("url");
+  }
+  
+  public void readDBConfFromFile() { readDBConfFromFile(Options.DB_FILE); }
+  public void readDBConfFromFile(String file) {
+    String json;
+    try {
+      Scanner s = new Scanner(new File(file));
+      json = s.useDelimiter("\\A").next();
+      s.close();
+    } catch (FileNotFoundException e) {
+      Log.error("[JAgoraServer] Could not find database configuration file " + file);
       return;
     }
     
@@ -210,10 +245,9 @@ public class JAgoraServer {
     Options.parseOptions(args);
     
     JAgoraServer jas = new JAgoraServer();
-    jas.readDBConfFromFile(Options.DB_FILE);
-    jas.startServer();
-    while (true)
-      jas.listen();
+    
+    jas.run();
+
   }
 
 }
