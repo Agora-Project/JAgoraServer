@@ -69,6 +69,7 @@ public class JAgoraServer {
     responders = new HashMap<Integer, QueryResponder>();
     responders.put(IJAgoraLib.LOGIN_ACTION, new LoginResponder());
     responders.put(IJAgoraLib.LOGOUT_ACTION, new LogoutResponder());
+    responders.put(IJAgoraLib.QUERY_BY_THREAD_ID_ACTION, new ThreadByIDResponder());
   }
   
   public QueryResponder getResponder(int operation) {

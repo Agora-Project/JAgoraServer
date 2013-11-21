@@ -81,6 +81,24 @@ public class DatabaseConnection implements java.lang.AutoCloseable {
     return null;
   }
   
+  /**
+   * Produces a statement. Don't forget to close it!
+   * @return
+   */
+  public PreparedStatement prepareStatement(String statement) {
+    if (!isConnected()) {
+      Log.error("[DatabaseConnection] Tried to perform query while not connected.");
+      return null;
+    }
+    
+    try {
+      return c.prepareStatement(statement);
+    } catch (SQLException e) {
+      Log.error("[DatabaseConnection] Could not create statement.");
+    }
+    return null;
+  }
+  
   protected boolean fail() { successState = false; return false; } 
   public boolean isConnected() { return c != null; }
 }

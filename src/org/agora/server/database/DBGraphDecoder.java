@@ -1,4 +1,4 @@
-package org.agora.server.serialisation;
+package org.agora.server.database;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -9,7 +9,6 @@ import org.agora.graph.JAgoraGraph;
 import org.agora.graph.JAgoraNode;
 import org.agora.graph.JAgoraNodeID;
 import org.agora.graph.VoteInformation;
-import org.agora.logging.Log;
 import org.bson.BSONDecoder;
 import org.bson.BSONObject;
 import org.bson.BasicBSONDecoder;
@@ -29,8 +28,7 @@ public class DBGraphDecoder {
       throws SQLException {
     // Get arguments with votes
     // TODO: get usernames
-    ResultSet rs = s
-        .executeQuery("SELECT a.arg_ID AS arg_ID, a.source_ID AS source_ID, "
+    ResultSet rs = s.executeQuery("SELECT a.arg_ID AS arg_ID, a.source_ID AS source_ID, "
             + "content, date, acceptability, "
             + "SUM(CASE WHEN v.type = 1 THEN 1 ELSE 0 END) AS positive_votes, "
             + "SUM(CASE WHEN v.type = 0 THEN 1 ELSE 0 END) AS negative_votes "
@@ -43,8 +41,7 @@ public class DBGraphDecoder {
       return false;
 
     // Get attacks with votes
-    rs = s
-        .executeQuery("SELECT a.arg_ID_attacker AS arg_ID_attacker, a.source_ID_attacker AS source_ID_attacker, "
+    rs = s.executeQuery("SELECT a.arg_ID_attacker AS arg_ID_attacker, a.source_ID_attacker AS source_ID_attacker, "
             + "a.arg_ID_defender AS arg_ID_defender, a.source_ID_defender AS source_ID_defender, "
             + "arg_att.thread_ID AS att_thread_ID, arg_def.thread_ID AS def_thread_ID, "
             + "SUM(CASE WHEN v.type = 1 THEN 1 ELSE 0 END) AS positive_votes, "
@@ -63,7 +60,6 @@ public class DBGraphDecoder {
     if (!success)
       return false;
 
-    rs = s.executeQuery("");
     return true;
   }
   

@@ -1,6 +1,5 @@
 package org.agora.server.queries;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 
@@ -8,7 +7,7 @@ import org.agora.graph.JAgoraGraph;
 import org.agora.lib.*;
 import org.agora.logging.Log;
 import org.agora.server.*;
-import org.agora.server.serialisation.DBGraphDecoder;
+import org.agora.server.database.DBGraphDecoder;
 import org.bson.BasicBSONObject;
 
 public class ThreadByIDResponder implements QueryResponder {
@@ -26,7 +25,7 @@ public class ThreadByIDResponder implements QueryResponder {
       return bsonResponse;
     }
     
-    int threadID = query.getInt(IJAgoraLib.QUERY_ID_FIELD);
+    int threadID = query.getInt(IJAgoraLib.THREAD_ID_FIELD);
     
     try (DatabaseConnection dbc = server.createDatabaseConnection()) {
       if (dbc == null) {
