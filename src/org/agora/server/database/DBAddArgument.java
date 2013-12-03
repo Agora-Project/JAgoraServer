@@ -14,7 +14,7 @@ import org.bson.BasicBSONObject;
 
 public class DBAddArgument {
 
-  protected static String ADD_QUERY = "INSERT INTO arguments (source_ID, thread_ID, user_ID, content) VALUES (?, ?, ?, ?);";
+  protected static String ADD_QUERY = "INSERT INTO arguments (source_ID_attacker, thread_ID, user_ID, content) VALUES (?, ?, ?, ?);";
   
   public static boolean addArgumentToDB(BasicBSONObject request, DatabaseConnection dbc) throws SQLException {
     BSONObject content = (BSONObject)request.get(IJAgoraLib.CONTENT_FIELD);
