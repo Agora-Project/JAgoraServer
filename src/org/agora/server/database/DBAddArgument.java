@@ -4,22 +4,17 @@ import java.io.ByteArrayInputStream;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.agora.lib.IJAgoraLib;
 import org.agora.server.DatabaseConnection;
 import org.agora.server.Options;
 import org.bson.BSONEncoder;
 import org.bson.BSONObject;
 import org.bson.BasicBSONEncoder;
-import org.bson.BasicBSONObject;
 
 public class DBAddArgument {
 
   protected static String ADD_QUERY = "INSERT INTO arguments (source_ID_attacker, thread_ID, user_ID, content) VALUES (?, ?, ?, ?);";
   
-  public static boolean addArgumentToDB(BasicBSONObject request, DatabaseConnection dbc) throws SQLException {
-    BSONObject content = (BSONObject)request.get(IJAgoraLib.CONTENT_FIELD);
-    int threadID = request.getInt(IJAgoraLib.THREAD_ID_FIELD);
-    int userID = request.getInt(IJAgoraLib.USER_ID_FIELD);
+  public static boolean addArgumentToDB(BSONObject content, int threadID, int userID, DatabaseConnection dbc) throws SQLException {
     
     PreparedStatement ps = dbc.prepareStatement(ADD_QUERY);
     ps.setString(1, Options.SERVER_URL);
@@ -35,8 +30,7 @@ public class DBAddArgument {
     
     int[] res = ps.executeBatch();
     
-    // TODO: needed?
-    // dbc.commit(); // This gives an error.
+    ps.close();
     dbc.close();
 
     return res[0] != 0;
