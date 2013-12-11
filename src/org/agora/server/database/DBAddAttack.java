@@ -1,6 +1,7 @@
 package org.agora.server.database;
 
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 import org.agora.graph.JAgoraNodeID;
@@ -8,16 +9,42 @@ import org.agora.server.DatabaseConnection;
 
 public class DBAddAttack {
 
-  static String x = "a.arg_ID_attacker AS arg_ID_attacker, a.source_ID_attacker AS source_ID_attacker, "
-      + "a.arg_ID_defender AS arg_ID_defender, a.source_ID_defender AS source_ID_defender, "
-      + "arg_att.thread_ID AS att_thread_ID, arg_def.thread_ID AS def_thread_ID, ";
+  
+  protected static String CHECK_QUERY = "SELECT 1 FROM attacks WHERE "
+                                      + "arg_ID_attacker = ? AND "
+                                      + "source_ID_attacker = ? AND "
+                                      + "arg_ID_defender = ? AND "
+                                      + "source_ID_defender = ?;";
+  
   
   protected static String ADD_QUERY = "INSERT INTO attacks (arg_ID_attacker, source_ID_attacker,"
                                                          + "arg_ID_defender, source_ID_defender,"
                                                          + "user_ID)"
                                                          + "VALUES (?, ?, ?, ?, ?);";
   
+  
+  
+  protected static boolean checkRecord(JAgoraNodeID attacker, JAgoraNodeID defender, DatabaseConnection dbc) throws SQLException {
+    PreparedStatement ps = dbc.prepareStatement(CHECK_QUERY);
+    ps.setInt(1, attacker.getLocalID());
+    ps.setString(2, attacker.getSource());
+    ps.setInt(3, defender.getLocalID());
+    ps.setString(4, defender.getSource());
+    
+    ps.addBatch();
+    
+    ResultSet rs = ps.executeQuery();
+    boolean res = rs.isAfterLast();
+    
+    ps.close();
+    
+    return res;
+  }
+  
   public static boolean addAttackToDB(int userID, JAgoraNodeID attacker, JAgoraNodeID defender, DatabaseConnection dbc) throws SQLException {
+    // TODO: This check should somehow say that the record already exists.
+    if (!checkRecord(attacker, defender, dbc))
+      return false;
     
     PreparedStatement ps = dbc.prepareStatement(ADD_QUERY);
     ps.setInt(1, attacker.getLocalID());
@@ -30,8 +57,7 @@ public class DBAddAttack {
     
     int[] res = ps.executeBatch();
     
-    // TODO: needed?
-    // dbc.commit(); // This gives an error.
+    ps.close();
     dbc.close();
 
     return res[0] != 0;

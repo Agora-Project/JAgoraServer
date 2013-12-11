@@ -24,24 +24,28 @@ public class AddAttackResponder implements QueryResponder {
       return bsonResponse;
     }
     
+    
     try {
       int userID = query.getInt(IJAgoraLib.USER_ID_FIELD);
       BSONGraphDecoder bdec = new BSONGraphDecoder();
       JAgoraNodeID attacker = bdec.deBSONiseNodeID((BasicBSONObject)query.get(IJAgoraLib.ATTACKER_FIELD));
       JAgoraNodeID defender = bdec.deBSONiseNodeID((BasicBSONObject)query.get(IJAgoraLib.DEFENDER_FIELD));
       
-      DBAddAttack.addAttackToDB(userID, attacker, defender, server.createDatabaseConnection());
+      boolean res = DBAddAttack.addAttackToDB(userID, attacker, defender, server.createDatabaseConnection());
+      if (res) {
+        bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_OK);
+      } else {
+        bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
+        bsonResponse.put(IJAgoraLib.REASON_FIELD, "Attack already existed (with high probability!)");
+      }
+      
+      return bsonResponse;
     } catch (SQLException e) {
       Log.error("[AddArgumentResponder] Could not execute add attack query ("+e.getMessage()+")");
       bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
       bsonResponse.put(IJAgoraLib.REASON_FIELD, "Server failure.");
       return bsonResponse;
     }
-    
-    
-    bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_OK);
-    
-    return bsonResponse;
   }
 
 }

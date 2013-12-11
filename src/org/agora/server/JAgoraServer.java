@@ -78,6 +78,7 @@ public class JAgoraServer {
     responders.put(IJAgoraLib.LOGOUT_ACTION, new LogoutResponder());
     responders.put(IJAgoraLib.QUERY_BY_THREAD_ID_ACTION, new ThreadByIDResponder());
     responders.put(IJAgoraLib.ADD_ARGUMENT_ACTION, new AddArgumentResponder());
+    responders.put(IJAgoraLib.ADD_ATTACK_ACTION, new AddAttackResponder());
   }
   
   public QueryResponder getResponder(int operation) {
