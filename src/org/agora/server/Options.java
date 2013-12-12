@@ -1,11 +1,17 @@
 package org.agora.server;
 
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
 import org.agora.logging.Log;
+
+import com.mongodb.DBObject;
+import com.mongodb.util.JSON;
 
 public class Options {
   
   // Server configuration
-  // TODO: read all configurations from file, not code.
   public static String CONF_FILE = "agora.conf";
   
   public static int NUM_WORKERS = 4;
@@ -35,14 +41,23 @@ public class Options {
   public static boolean ERROR_MESSAGES = true;
   
   public static String LOG_FILE = "/var/log/agorad.log";
-  public static String ERROR_FILE = "/var/log/agorad.err";
   public static String DEBUG_FILE = "/var/log/agorad.dbg";
+  public static String ERROR_FILE = "/var/log/agorad.err";
   
+  
+  /**
+   * Parses all command line options.
+   * @param args
+   */
   public static void parseOptions(String[] args) {
     for (String opt: args)
       parseOption(opt);
   }
   
+  /**
+   * Parses a single command-line option.
+   * @param option
+   */
   public static void parseOption(String option) {
     if (option.indexOf('=') >= 0) { // Assignment options
        String[] tokens = option.split("=");
@@ -60,6 +75,67 @@ public class Options {
     } else { // No assignment option
     }
     
+  }
+  
+  /**
+   * Reads Agora Server options from default configuration file.
+   */
+  public static void readAgoraConfFromFile() { readAgoraConfFromFile(CONF_FILE); }
+  
+  /**
+   * Reads Agora Server options from given configuration file.
+   * @param Configuration file.
+   */
+  public static void readAgoraConfFromFile(String file) {
+    String json;
+    try {
+      Scanner s = new Scanner(new File(file));
+      json = s.useDelimiter("\\A").next();
+      s.close();
+    } catch (FileNotFoundException e) {
+      Log.error("[JAgoraServer] Could not find configuration file " + file);
+      return;
+    }
+    
+    // Not even checking whether they exist. They must - boom!
+    
+    DBObject bson = (DBObject) JSON.parse(json);
+    SERVER_URL = (String) bson.get("url");
+    NUM_WORKERS = (Integer) bson.get("number of workers");
+    SESSION_BYTE_LENGTH = (Integer) bson.get("session token size");
+    REQUEST_WAIT = (Integer) bson.get("request timeout");
+    LOG_MESSAGES = (Boolean) bson.get("log");
+    DEBUG_MESSAGES = (Boolean) bson.get("debug log");
+    ERROR_MESSAGES = (Boolean) bson.get("error log");
+    LOG_FILE = (String) bson.get("log file");
+    DEBUG_FILE = (String) bson.get("debug log file");
+    ERROR_FILE = (String) bson.get("error log file");
+  }
+  
+  /**
+   * Reads Agora Server database options from default configuration file.
+   */
+  public static void readDBConfFromFile() { readDBConfFromFile(DB_FILE); }
+  
+  /**
+   * Reads Agora Server database options from given configuration file.
+   * @param Configuration file.
+   */
+  public static void readDBConfFromFile(String file) {
+    String json;
+    try {
+      Scanner s = new Scanner(new File(file));
+      json = s.useDelimiter("\\A").next();
+      s.close();
+    } catch (FileNotFoundException e) {
+      Log.error("[JAgoraServer] Could not find database configuration file " + file);
+      return;
+    }
+    
+    DBObject bson = (DBObject) JSON.parse(json);
+    DB_URL = (String) bson.get("url");
+    DB_USER = (String) bson.get("user");
+    DB_PASS = (String) bson.get("pass");
   }
 }
 

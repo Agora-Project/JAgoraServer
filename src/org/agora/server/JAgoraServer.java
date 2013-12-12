@@ -1,7 +1,5 @@
 package org.agora.server;
 
-import java.io.File;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -13,9 +11,6 @@ import org.agora.lib.*;
 import org.agora.logging.ConsoleLog;
 import org.agora.logging.Log;
 import org.bson.BasicBSONObject;
-
-import com.mongodb.DBObject;
-import com.mongodb.util.JSON;
 
 
 public class JAgoraServer {
@@ -64,8 +59,8 @@ public class JAgoraServer {
   }
   
   protected void readConfigurationFiles() {
-    readDBConfFromFile();
-    readAgoraConfFromFile();
+    Options.readDBConfFromFile();
+    Options.readAgoraConfFromFile();
   }
   
   /**
@@ -203,48 +198,14 @@ public class JAgoraServer {
     Log.addLog(new ConsoleLog());
   }
   
-  public void readAgoraConfFromFile() { readAgoraConfFromFile(Options.CONF_FILE); }
-  public void readAgoraConfFromFile(String file) {
-    String json;
-    try {
-      Scanner s = new Scanner(new File(file));
-      json = s.useDelimiter("\\A").next();
-      s.close();
-    } catch (FileNotFoundException e) {
-      Log.error("[JAgoraServer] Could not find configuration file " + file);
-      return;
-    }
-    
-    DBObject bson = (DBObject) JSON.parse(json);
-    Options.SERVER_URL = (String) bson.get("url");
-  }
-  
-  public void readDBConfFromFile() { readDBConfFromFile(Options.DB_FILE); }
-  public void readDBConfFromFile(String file) {
-    String json;
-    try {
-      Scanner s = new Scanner(new File(file));
-      json = s.useDelimiter("\\A").next();
-      s.close();
-    } catch (FileNotFoundException e) {
-      Log.error("[JAgoraServer] Could not find database configuration file " + file);
-      return;
-    }
-    
-    DBObject bson = (DBObject) JSON.parse(json);
-    Options.DB_URL = (String) bson.get("url");
-    Options.DB_USER = (String) bson.get("user");
-    Options.DB_PASS = (String) bson.get("pass");
-  }
-  
-  
-  
   public static void main(String[] args) {
     JAgoraServer.InitLogging();
     Log.log("[JAgoraServer] starting.");
     
+    // Parse command-line options first.
     Options.parseOptions(args);
     
+    // Regular options are while constructing the server.
     JAgoraServer jas = new JAgoraServer();
     
     jas.run();
