@@ -25,7 +25,8 @@ public class LoginResponder implements QueryResponder {
       
       // TODO: password is already hashed?
       String user = query.getString(IJAgoraLib.USER_FIELD);
-      String pass = query.getString(IJAgoraLib.PASSWORD_FIELD);
+      String pass = Util.hash(query.getString(IJAgoraLib.PASSWORD_FIELD));
+      System.out.println(pass);
       
       Statement s = dbc.produceStatement();
       if (s == null) {

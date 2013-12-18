@@ -76,6 +76,7 @@ public class JAgoraServer {
     responders.put(IJAgoraLib.ADD_ATTACK_ACTION, new AddAttackResponder());
     responders.put(IJAgoraLib.ADD_ARGUMENT_VOTE_ACTION, new AddArgumentVoteResponder());
     responders.put(IJAgoraLib.ADD_ATTACK_VOTE_ACTION, new AddAttackVoteResponder());
+    responders.put(IJAgoraLib.REGISTER_ACTION, new RegisterResponder());
   }
   
   public QueryResponder getResponder(int operation) {

@@ -12,7 +12,7 @@ import org.bson.BasicBSONEncoder;
 
 public class DBAddArgument {
 
-  protected static String ADD_QUERY = "INSERT INTO arguments (source_ID_attacker, thread_ID, user_ID, content) VALUES (?, ?, ?, ?);";
+  protected static String ADD_QUERY = "INSERT INTO arguments (source_ID, thread_ID, user_ID, content) VALUES (?, ?, ?, ?);";
   
   public static boolean addArgumentToDB(BSONObject content, int threadID, int userID, DatabaseConnection dbc) throws SQLException {
     

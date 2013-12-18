@@ -30,7 +30,7 @@ public class DBGraphDecoder {
     // Get arguments with votes
     // TODO: get usernames
     ResultSet rs = s.executeQuery("SELECT a.arg_ID AS arg_ID, a.source_ID AS source_ID, "
-            + "content, date, acceptability, "
+            + "content, date, acceptability, thread_ID, a.user_ID as user_ID"
             + "SUM(CASE WHEN v.type = 1 THEN 1 ELSE 0 END) AS positive_votes, "
             + "SUM(CASE WHEN v.type = 0 THEN 1 ELSE 0 END) AS negative_votes "
             + "FROM `arguments` a LEFT OUTER JOIN `votes` v "
@@ -92,7 +92,7 @@ public class DBGraphDecoder {
     node.setDate(new Date(rs.getTimestamp("date").getTime()));
     node.setAcceptability(rs.getBigDecimal("acceptability"));
     node.setThreadID(rs.getInt("thread_ID"));
-    node.setPosterID(rs.getInt("poster_ID"));
+    node.setPosterID(rs.getInt("user_ID"));
     node.setPosterName(rs.getString("username"));
     
     // Vote information
