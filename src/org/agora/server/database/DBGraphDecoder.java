@@ -30,12 +30,14 @@ public class DBGraphDecoder {
     // Get arguments with votes
     // TODO: get usernames
     ResultSet rs = s.executeQuery("SELECT a.arg_ID AS arg_ID, a.source_ID AS source_ID, "
-            + "content, date, acceptability, thread_ID, a.user_ID as user_ID"
+            + "content, a.date AS date, acceptability, thread_ID, "
+            + "a.user_ID AS user_ID, u.username AS username, "
             + "SUM(CASE WHEN v.type = 1 THEN 1 ELSE 0 END) AS positive_votes, "
             + "SUM(CASE WHEN v.type = 0 THEN 1 ELSE 0 END) AS negative_votes "
             + "FROM `arguments` a LEFT OUTER JOIN `votes` v "
             + "ON a.arg_ID = v.arg_ID AND a.source_ID = v.source_ID "
-            + "WHERE a.arg_ID IS NOT NULL AND a.thread_ID = '" + threadID + "' " + "GROUP BY a.arg_ID, a.source_ID;");
+            + "INNER JOIN `users` u ON a.user_ID = u.user_ID "
+            + "WHERE a.thread_ID = '" + threadID + "' " + "GROUP BY a.arg_ID, a.source_ID;");
     boolean success = loadNodesFromResultSet(rs);
     rs.close(); // Is this important?
     if (!success)
@@ -50,11 +52,11 @@ public class DBGraphDecoder {
             + "FROM `attacks` a LEFT OUTER JOIN `votes` v "
             + "ON a.arg_ID_attacker = v.arg_ID_attacker AND a.source_ID_attacker = v.source_ID_attacker AND "
             + "   a.arg_ID_defender = v.arg_ID_defender AND a.source_ID_defender = v.source_ID_defender "
-            + "INNER JOIN `arguments` arg_att"
-            + "ON a.arg_ID_attacker = arg_att.arg_ID AND a.source_ID_attacker = arg_att.source_ID"
-            + "INNER JOIN `arguments` arg_def"
-            + "ON a.arg_ID_defender = arg_def.arg_ID AND a.source_ID_defender = arg_def.source_ID"
-            + "WHERE v.arg_ID IS NULL AND (arg_att.thread_ID = '" + threadID + "' OR arg_def.thread_ID = '" + threadID + "')"
+            + "INNER JOIN `arguments` arg_att "
+            + "ON a.arg_ID_attacker = arg_att.arg_ID AND a.source_ID_attacker = arg_att.source_ID "
+            + "INNER JOIN `arguments` arg_def "
+            + "ON a.arg_ID_defender = arg_def.arg_ID AND a.source_ID_defender = arg_def.source_ID "
+            + "WHERE v.arg_ID IS NULL AND (arg_att.thread_ID = '" + threadID + "' OR arg_def.thread_ID = '" + threadID + "') "
             + "GROUP BY a.arg_ID_attacker, a.source_ID_attacker, a.arg_ID_defender, a.source_ID_defender;");
     success = loadAttacksFromResultSet(rs);
     rs.close();
