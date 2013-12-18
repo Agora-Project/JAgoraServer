@@ -33,13 +33,13 @@ public class DBAddVote {
   }
   
   
-  protected static String ADD_ATTACK_VOTE_QUERY = "INSERT INTO votes (type, user_ID, source_ID_attacker, arg_ID_attacker, source_ID_defender, arg_ID_defender) VALUES (?, ?, ?, ?);";
+  protected static String ADD_ATTACK_VOTE_QUERY = "INSERT INTO votes (type, user_ID, source_ID_attacker, arg_ID_attacker, source_ID_defender, arg_ID_defender) VALUES (?, ?, ?, ?, ?, ?);";
   
   public static boolean addAttackVoteToDB(JAgoraNodeID attackerID, JAgoraNodeID defenderID, int voteType, int userID, DatabaseConnection dbc) throws SQLException {
     // TODO: return error somehow.
     if(!DBChecks.attackExists(attackerID, defenderID, dbc)) return false;
     
-    PreparedStatement ps = dbc.prepareStatement(ADD_ARGUMENT_VOTE_QUERY);
+    PreparedStatement ps = dbc.prepareStatement(ADD_ATTACK_VOTE_QUERY);
     ps.setInt(1, voteType);
     ps.setInt(2, userID);
     ps.setString(3, attackerID.getSource());

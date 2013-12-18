@@ -9,7 +9,7 @@ import org.agora.server.DatabaseConnection;
 
 public class DBChecks {
 
-  protected static String CHECK_ARGUMENT_QUERY = "SELECT 1 FROM argument WHERE "
+  protected static String CHECK_ARGUMENT_QUERY = "SELECT 1 FROM arguments WHERE "
                                                + "arg_ID = ? AND source_ID = ?;";
 
   protected static String CHECK_ATTACK_QUERY = "SELECT 1 FROM attacks WHERE "
@@ -59,7 +59,7 @@ public class DBChecks {
     ps.addBatch();
     
     ResultSet rs = ps.executeQuery();
-    boolean empty = rs.isAfterLast();
+    boolean empty = !rs.next();
     
     ps.close();
     

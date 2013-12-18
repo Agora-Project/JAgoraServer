@@ -56,6 +56,7 @@ public class ThreadByIDResponder implements QueryResponder {
       // Add it to the response
       bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_OK);
       bsonResponse.put(IJAgoraLib.GRAPH_FIELD, bsonGraph);
+      return bsonResponse;
       
     } catch (SQLException e) {
       Log.error("[ThreadByIDResponder] Could not execute query ("+e.getMessage()+")");
@@ -63,7 +64,5 @@ public class ThreadByIDResponder implements QueryResponder {
       bsonResponse.put(IJAgoraLib.REASON_FIELD, "Server failure.");
       return bsonResponse;
     }
-    
-    return null;
   }
 }

@@ -28,7 +28,12 @@ public class AddArgumentResponder implements QueryResponder {
       int threadID = query.getInt(IJAgoraLib.THREAD_ID_FIELD);
       int userID = query.getInt(IJAgoraLib.USER_ID_FIELD);
       
-      DBAddArgument.addArgumentToDB(content, threadID, userID, server.createDatabaseConnection());
+      boolean res = DBAddArgument.addArgumentToDB(content, threadID, userID, server.createDatabaseConnection());
+      if (!res) {
+        bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
+        bsonResponse.put(IJAgoraLib.REASON_FIELD, "Database failure.");
+        return bsonResponse;
+      }
     } catch (SQLException e) {
       Log.error("[AddArgumentResponder] Could not execute add argument query ("+e.getMessage()+")");
       bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
