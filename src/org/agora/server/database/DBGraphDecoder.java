@@ -136,8 +136,8 @@ public class DBGraphDecoder {
         rs.getString("source_ID_attacker"),
         rs.getInt("arg_ID_attacker"));
     JAgoraNodeID defenderID = new JAgoraNodeID(
-        rs.getString("source_ID_attacker"),
-        rs.getInt("arg_ID_attacker"));
+        rs.getString("source_ID_defender"),
+        rs.getInt("arg_ID_defender"));
     
     JAgoraNode attacker = graph.getNodeByID(attackerID);
     if (attacker == null) { // Create placeholder node.
