@@ -3,12 +3,14 @@ package org.agora.server.database;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.ArrayList;
 import java.util.Date;
 
 import org.agora.graph.JAgoraEdge;
 import org.agora.graph.JAgoraGraph;
 import org.agora.graph.JAgoraNode;
 import org.agora.graph.JAgoraNodeID;
+import org.agora.graph.JAgoraThread;
 import org.agora.graph.VoteInformation;
 import org.bson.BSONDecoder;
 import org.bson.BSONObject;
@@ -24,7 +26,17 @@ public class DBGraphDecoder {
   
   public JAgoraGraph getGraph() { return graph; }
   
-  
+  public ArrayList<JAgoraThread> getThreads(Statement s) throws SQLException {
+      
+      ArrayList<JAgoraThread> threads;
+      
+      ResultSet rs = s.executeQuery("SELECT * FROM threads;");
+      
+      threads = loadThreadsFromResultSet(rs);
+      rs.close();
+      
+      return threads;
+  } 
   public boolean loadGraphByThreadID(Statement s, int threadID)
       throws SQLException {
     // Get arguments with votes
@@ -122,6 +134,16 @@ public class DBGraphDecoder {
     return true;
   }
   
+  protected ArrayList<JAgoraThread> loadThreadsFromResultSet(ResultSet rs) throws SQLException {
+      
+      ArrayList<JAgoraThread> threads = new ArrayList<>();
+      
+      while (rs.next())
+          threads.add(loadThreadFromResultSet(rs));
+      
+      return threads;
+  }
+  
   
   
   
@@ -176,5 +198,17 @@ public class DBGraphDecoder {
   
   protected VoteInformation loadVoteInformationFromResultSet(ResultSet rs) throws SQLException {
     return new VoteInformation(rs.getInt("positive_votes"), rs.getInt("negative_votes"));
+  }
+
+  protected JAgoraThread loadThreadFromResultSet(ResultSet rs) throws SQLException {
+    int id;
+    String title;
+    String description;
+    
+    id = rs.getInt("ID");
+    title = rs.getString("title");
+    description = rs.getString("Description");
+    
+    return new JAgoraThread(id, title, description);
   }
 }
