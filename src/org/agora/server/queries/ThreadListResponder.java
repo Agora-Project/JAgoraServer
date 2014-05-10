@@ -3,6 +3,7 @@ package org.agora.server.queries;
 import java.sql.Statement;
 import java.util.ArrayList;
 import org.agora.graph.JAgoraThread;
+import org.agora.lib.BSONThreadListEncoder;
 import org.agora.lib.IJAgoraLib;
 import org.agora.logging.Log;
 import org.agora.server.DatabaseConnection;
@@ -49,7 +50,13 @@ public class ThreadListResponder implements QueryResponder{
       DBGraphDecoder dgd = new DBGraphDecoder();
       threads = dgd.getThreads(s);
       
+      BSONThreadListEncoder enc = new BSONThreadListEncoder();
+      BasicBSONObject bsonThreads = enc.BSONiseThreadList(threads);
       
+      // Add it to the response
+      bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_OK);
+      bsonResponse.put(IJAgoraLib.THREAD_FIELD, bsonThreads);
+      return bsonResponse;
       
     } catch (Exception e) {
       Log.error("[ThreadListResponder] Could not execute query ("+e.getMessage()+")");
@@ -57,7 +64,6 @@ public class ThreadListResponder implements QueryResponder{
       bsonResponse.put(IJAgoraLib.REASON_FIELD, "Server failure.");
       return bsonResponse;
     }
-        return bsonResponse;
   }
 
 }

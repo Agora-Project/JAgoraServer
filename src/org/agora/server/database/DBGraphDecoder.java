@@ -5,6 +5,7 @@ import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Locale;
 
 import org.agora.graph.JAgoraEdge;
 import org.agora.graph.JAgoraGraph;
@@ -30,7 +31,7 @@ public class DBGraphDecoder {
       
       ArrayList<JAgoraThread> threads;
       
-      ResultSet rs = s.executeQuery("SELECT * FROM threads;");
+      ResultSet rs = s.executeQuery("SELECT t.thread_id AS ID, t.title as Title, t.description as Description FROM `threads` t;");
       
       threads = loadThreadsFromResultSet(rs);
       rs.close();
@@ -206,7 +207,7 @@ public class DBGraphDecoder {
     String description;
     
     id = rs.getInt("ID");
-    title = rs.getString("title");
+    title = rs.getString("Title");
     description = rs.getString("Description");
     
     return new JAgoraThread(id, title, description);
