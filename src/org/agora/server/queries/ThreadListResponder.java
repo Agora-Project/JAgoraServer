@@ -55,7 +55,7 @@ public class ThreadListResponder implements QueryResponder{
       
       // Add it to the response
       bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_OK);
-      bsonResponse.put(IJAgoraLib.THREAD_FIELD, bsonThreads);
+      bsonResponse.put(IJAgoraLib.THREAD_LIST_FIELD, bsonThreads);
       return bsonResponse;
       
     } catch (Exception e) {
