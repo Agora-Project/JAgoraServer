@@ -1,11 +1,13 @@
 package org.agora.server.queries;
 
 import java.sql.SQLException;
+import org.agora.graph.JAgoraNodeID;
 
 import org.agora.lib.IJAgoraLib;
 import org.agora.logging.Log;
 import org.agora.server.*;
 import org.agora.server.database.DBAddArgument;
+import org.agora.server.database.DBChecks;
 import org.bson.BSONObject;
 import org.bson.BasicBSONObject;
 
@@ -39,10 +41,20 @@ public class AddArgumentResponder implements QueryResponder {
       bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
       bsonResponse.put(IJAgoraLib.REASON_FIELD, "Server failure.");
       return bsonResponse;
+    } 
+    JAgoraNodeID latestID = null;
+    try {
+        latestID = DBChecks.latestArgument(server.createDatabaseConnection());
+    } catch (SQLException e) {
+        Log.error("[AddArgumentResponder] Could not return latest argument ID ("+e.getMessage()+")");
+        bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
+        bsonResponse.put(IJAgoraLib.REASON_FIELD, "Server failure.");
     }
     
+     
     
     bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_OK);
+    bsonResponse.put(IJAgoraLib.ARGUMENT_ID_FIELD, latestID);
     
     return bsonResponse;
   }

@@ -18,6 +18,8 @@ public class DBChecks {
                                              + "arg_ID_defender = ? AND "
                                              + "source_ID_defender = ?;";
   
+  protected static String CHECK_LATEST_ARGUMENT_QUERY = "SELECT LAST_INSERT_ID();";
+  
   
   /**
    * Checks whether a given argument exists.
@@ -64,5 +66,17 @@ public class DBChecks {
     ps.close();
     
     return !empty;
+  }
+  
+  public static JAgoraNodeID latestArgument(DatabaseConnection dbc) throws SQLException {
+      PreparedStatement ps = dbc.prepareStatement(CHECK_LATEST_ARGUMENT_QUERY);
+      
+      ps.addBatch();
+    
+      ResultSet rs = ps.executeQuery();
+      JAgoraNodeID result = (JAgoraNodeID) rs.getObject("LAST_INSERT_ID()");
+      ps.close();
+      
+      return result;
   }
 }
