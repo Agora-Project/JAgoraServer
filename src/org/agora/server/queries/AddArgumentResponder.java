@@ -42,7 +42,7 @@ public class AddArgumentResponder implements QueryResponder {
       bsonResponse.put(IJAgoraLib.REASON_FIELD, "Server failure.");
       return bsonResponse;
     } 
-    JAgoraNodeID latestID = null;
+    BasicBSONObject latestID = null;
     try {
         latestID = DBChecks.latestArgument(server.createDatabaseConnection());
     } catch (SQLException e) {

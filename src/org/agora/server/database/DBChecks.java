@@ -6,6 +6,8 @@ import java.sql.SQLException;
 
 import org.agora.graph.JAgoraNodeID;
 import org.agora.server.DatabaseConnection;
+import org.agora.server.Options;
+import org.bson.BasicBSONObject;
 
 public class DBChecks {
 
@@ -68,13 +70,18 @@ public class DBChecks {
     return !empty;
   }
   
-  public static JAgoraNodeID latestArgument(DatabaseConnection dbc) throws SQLException {
+  public static BasicBSONObject latestArgument(DatabaseConnection dbc) throws SQLException {
       PreparedStatement ps = dbc.prepareStatement(CHECK_LATEST_ARGUMENT_QUERY);
       
       ps.addBatch();
     
       ResultSet rs = ps.executeQuery();
-      JAgoraNodeID result = (JAgoraNodeID) rs.getObject("LAST_INSERT_ID()");
+      
+      BasicBSONObject result = new BasicBSONObject();
+      result.put("Source", Options.SERVER_URL);
+      rs.next();
+      System.out.println(rs.getInt(1));
+      result.put("ID", rs.getInt(1));
       ps.close();
       
       return result;
