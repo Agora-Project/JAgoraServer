@@ -1,5 +1,6 @@
 package org.agora.server.queries;
 
+import java.sql.ResultSet;
 import java.sql.SQLException;
 import org.agora.graph.JAgoraNodeID;
 
@@ -25,13 +26,14 @@ public class AddArgumentResponder implements QueryResponder {
       return bsonResponse;
     }
     
+    BasicBSONObject latestID = null;
     try {
       BSONObject content = (BSONObject)query.get(IJAgoraLib.CONTENT_FIELD);
       int threadID = query.getInt(IJAgoraLib.THREAD_ID_FIELD);
       int userID = query.getInt(IJAgoraLib.USER_ID_FIELD);
       
-      boolean res = DBAddArgument.addArgumentToDB(content, threadID, userID, server.createDatabaseConnection());
-      if (!res) {
+        latestID = DBAddArgument.addArgumentToDB(content, threadID, userID, server.createDatabaseConnection());
+      if (!latestID.containsField("ID")) {
         bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
         bsonResponse.put(IJAgoraLib.REASON_FIELD, "Database failure.");
         return bsonResponse;
@@ -41,18 +43,7 @@ public class AddArgumentResponder implements QueryResponder {
       bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
       bsonResponse.put(IJAgoraLib.REASON_FIELD, "Server failure.");
       return bsonResponse;
-    } 
-    BasicBSONObject latestID = null;
-    try {
-        latestID = DBChecks.latestArgument(server.createDatabaseConnection());
-    } catch (SQLException e) {
-        Log.error("[AddArgumentResponder] Could not return latest argument ID ("+e.getMessage()+")");
-        bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
-        bsonResponse.put(IJAgoraLib.REASON_FIELD, "Server failure.");
     }
-    
-     
-    
     bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_OK);
     bsonResponse.put(IJAgoraLib.ARGUMENT_ID_FIELD, latestID);
     
