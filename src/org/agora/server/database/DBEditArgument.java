@@ -16,7 +16,7 @@ import org.bson.BasicBSONObject;
  */
 public class DBEditArgument {
     
-    protected static String EDIT_QUERY = "UPDATE arguments SET content = ? WHERE arg_id = ?;";
+    protected static String EDIT_QUERY = "UPDATE arguments SET content = ? WHERE arg_id = ? AND user_id = ?;";
     
     public static boolean editArgumentOnDB(BSONObject content, JAgoraNodeID nodeID, int userID, DatabaseConnection dbc) throws SQLException {
         PreparedStatement ps = dbc.prepareStatement(EDIT_QUERY);
@@ -28,7 +28,7 @@ public class DBEditArgument {
         
         ps.setInt(2, nodeID.getLocalID());
         
-        //ps.setInt(3, userID);
+        ps.setInt(3, userID);
         
         ps.addBatch();
     
