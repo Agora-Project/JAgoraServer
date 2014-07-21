@@ -3,14 +3,14 @@ package org.agora.server.database;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.agora.graph.JAgoraNodeID;
+import org.agora.graph.JAgoraArgumentID;
 import org.agora.server.DatabaseConnection;
 
 public class DBAddVote {
 
   protected static String ADD_ARGUMENT_VOTE_QUERY = "INSERT INTO votes (type, user_ID, source_ID, arg_ID) VALUES (?, ?, ?, ?);";
   
-  public static boolean addArgumentVoteToDB(JAgoraNodeID nodeID, int voteType, int userID, DatabaseConnection dbc) throws SQLException {
+  public static boolean addArgumentVoteToDB(JAgoraArgumentID nodeID, int voteType, int userID, DatabaseConnection dbc) throws SQLException {
     // TODO: return error somehow.
     if(!DBChecks.argumentExists(nodeID, dbc))
       return false;
@@ -35,7 +35,7 @@ public class DBAddVote {
   
   protected static String ADD_ATTACK_VOTE_QUERY = "INSERT INTO votes (type, user_ID, source_ID_attacker, arg_ID_attacker, source_ID_defender, arg_ID_defender) VALUES (?, ?, ?, ?, ?, ?);";
   
-  public static boolean addAttackVoteToDB(JAgoraNodeID attackerID, JAgoraNodeID defenderID, int voteType, int userID, DatabaseConnection dbc) throws SQLException {
+  public static boolean addAttackVoteToDB(JAgoraArgumentID attackerID, JAgoraArgumentID defenderID, int voteType, int userID, DatabaseConnection dbc) throws SQLException {
     // TODO: return error somehow.
     if(!DBChecks.attackExists(attackerID, defenderID, dbc)) return false;
     

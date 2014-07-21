@@ -2,7 +2,7 @@ package org.agora.server.queries;
 
 import java.sql.SQLException;
 
-import org.agora.graph.JAgoraNodeID;
+import org.agora.graph.JAgoraArgumentID;
 import org.agora.lib.BSONGraphDecoder;
 import org.agora.lib.IJAgoraLib;
 import org.agora.logging.Log;
@@ -28,8 +28,8 @@ public class AddAttackResponder implements QueryResponder {
     try {
       int userID = query.getInt(IJAgoraLib.USER_ID_FIELD);
       BSONGraphDecoder bdec = new BSONGraphDecoder();
-      JAgoraNodeID attacker = bdec.deBSONiseNodeID((BasicBSONObject)query.get(IJAgoraLib.ATTACKER_FIELD));
-      JAgoraNodeID defender = bdec.deBSONiseNodeID((BasicBSONObject)query.get(IJAgoraLib.DEFENDER_FIELD));
+      JAgoraArgumentID attacker = bdec.deBSONiseNodeID((BasicBSONObject)query.get(IJAgoraLib.ATTACKER_FIELD));
+      JAgoraArgumentID defender = bdec.deBSONiseNodeID((BasicBSONObject)query.get(IJAgoraLib.DEFENDER_FIELD));
       
       boolean res = DBAddAttack.addAttackToDB(userID, attacker, defender, server.createDatabaseConnection());
       if (res) {

@@ -4,7 +4,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-import org.agora.graph.JAgoraNodeID;
+import org.agora.graph.JAgoraArgumentID;
 import org.agora.server.DatabaseConnection;
 import org.agora.server.Options;
 import org.bson.BasicBSONObject;
@@ -30,7 +30,7 @@ public class DBChecks {
    * @return
    * @throws SQLException
    */
-  public static boolean argumentExists(JAgoraNodeID node, DatabaseConnection dbc) throws SQLException {
+  public static boolean argumentExists(JAgoraArgumentID node, DatabaseConnection dbc) throws SQLException {
     PreparedStatement ps = dbc.prepareStatement(CHECK_ARGUMENT_QUERY);
     ps.setInt(1, node.getLocalID());
     ps.setString(2, node.getSource());
@@ -53,7 +53,7 @@ public class DBChecks {
    * @return
    * @throws SQLException
    */
-  public static boolean attackExists(JAgoraNodeID attacker, JAgoraNodeID defender, DatabaseConnection dbc) throws SQLException {
+  public static boolean attackExists(JAgoraArgumentID attacker, JAgoraArgumentID defender, DatabaseConnection dbc) throws SQLException {
     PreparedStatement ps = dbc.prepareStatement(CHECK_ATTACK_QUERY);
     ps.setInt(1, attacker.getLocalID());
     ps.setString(2, attacker.getSource());

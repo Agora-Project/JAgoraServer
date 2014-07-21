@@ -6,10 +6,10 @@ import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.Date;
 
-import org.agora.graph.JAgoraEdge;
+import org.agora.graph.JAgoraAttack;
 import org.agora.graph.JAgoraGraph;
-import org.agora.graph.JAgoraNode;
-import org.agora.graph.JAgoraNodeID;
+import org.agora.graph.JAgoraArgument;
+import org.agora.graph.JAgoraArgumentID;
 import org.agora.graph.JAgoraThread;
 import org.agora.graph.VoteInformation;
 import org.bson.BSONDecoder;
@@ -84,11 +84,11 @@ public class DBGraphDecoder {
    * @return What you'd expect :D
    * @throws SQLException
    */
-  protected JAgoraNode loadNodeFromResultSet(ResultSet rs) throws SQLException {
-    JAgoraNode node = new JAgoraNode();
+  protected JAgoraArgument loadNodeFromResultSet(ResultSet rs) throws SQLException {
+    JAgoraArgument node = new JAgoraArgument();
     
     // ID
-    JAgoraNodeID id = new JAgoraNodeID();
+    JAgoraArgumentID id = new JAgoraArgumentID();
     id.setSource(rs.getString("source_ID"));
     id.setLocalID(rs.getInt("arg_ID"));
     node.construct(id);
@@ -153,26 +153,26 @@ public class DBGraphDecoder {
    * @return An edge
    * @throws SQLException
    */
-  protected JAgoraEdge loadAttackFromResultSet(ResultSet rs) throws SQLException {
-    JAgoraNodeID attackerID = new JAgoraNodeID(
+  protected JAgoraAttack loadAttackFromResultSet(ResultSet rs) throws SQLException {
+    JAgoraArgumentID attackerID = new JAgoraArgumentID(
         rs.getString("source_ID_attacker"),
         rs.getInt("arg_ID_attacker"));
-    JAgoraNodeID defenderID = new JAgoraNodeID(
+    JAgoraArgumentID defenderID = new JAgoraArgumentID(
         rs.getString("source_ID_defender"),
         rs.getInt("arg_ID_defender"));
     
-    JAgoraNode attacker = graph.getNodeByID(attackerID);
+    JAgoraArgument attacker = graph.getNodeByID(attackerID);
     if (attacker == null) { // Create placeholder node.
-      attacker = new JAgoraNode(attackerID);
+      attacker = new JAgoraArgument(attackerID);
       attacker.setThreadID(rs.getInt("att_thread_ID"));
     }
-    JAgoraNode defender = graph.getNodeByID(defenderID);
+    JAgoraArgument defender = graph.getNodeByID(defenderID);
     if (defender == null) {
-      defender = new JAgoraNode(defenderID);
+      defender = new JAgoraArgument(defenderID);
       defender.setThreadID(rs.getInt("def_thread_ID"));
     }
     
-    JAgoraEdge edge = new JAgoraEdge(attacker, defender);
+    JAgoraAttack edge = new JAgoraAttack(attacker, defender);
     
     edge.setVotes(loadVoteInformationFromResultSet(rs));
     return edge;

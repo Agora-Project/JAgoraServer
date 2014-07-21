@@ -3,7 +3,7 @@ package org.agora.server.database;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
 
-import org.agora.graph.JAgoraNodeID;
+import org.agora.graph.JAgoraArgumentID;
 import org.agora.server.DatabaseConnection;
 
 public class DBAddAttack {
@@ -16,7 +16,7 @@ public class DBAddAttack {
   
   
   
-  public static boolean addAttackToDB(int userID, JAgoraNodeID attacker, JAgoraNodeID defender, DatabaseConnection dbc) throws SQLException {
+  public static boolean addAttackToDB(int userID, JAgoraArgumentID attacker, JAgoraArgumentID defender, DatabaseConnection dbc) throws SQLException {
     // TODO: These checks should somehow say that the record already exists.
     if (!DBChecks.argumentExists(attacker, dbc))        return false;
     if (!DBChecks.argumentExists(defender, dbc))        return false;

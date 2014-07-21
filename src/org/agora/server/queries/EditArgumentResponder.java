@@ -4,7 +4,7 @@ import com.mongodb.DBDecoder;
 import java.sql.SQLException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.agora.graph.JAgoraNodeID;
+import org.agora.graph.JAgoraArgumentID;
 import org.agora.lib.BSONGraphDecoder;
 import org.agora.lib.IJAgoraLib;
 import org.agora.logging.Log;
@@ -34,7 +34,7 @@ public class EditArgumentResponder implements QueryResponder {
         try {
             BSONObject content = (BSONObject)query.get(IJAgoraLib.CONTENT_FIELD);
             int userID = query.getInt(IJAgoraLib.USER_ID_FIELD);
-            JAgoraNodeID nodeID = new BSONGraphDecoder().deBSONiseNodeID((BasicBSONObject)query.get(IJAgoraLib.ARGUMENT_ID_FIELD));
+            JAgoraArgumentID nodeID = new BSONGraphDecoder().deBSONiseNodeID((BasicBSONObject)query.get(IJAgoraLib.ARGUMENT_ID_FIELD));
             
             boolean res = DBEditArgument.editArgumentOnDB(content, nodeID, userID, server.createDatabaseConnection());
             if (res) {

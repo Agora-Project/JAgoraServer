@@ -2,7 +2,7 @@ package org.agora.server.queries;
 
 import java.sql.SQLException;
 
-import org.agora.graph.JAgoraNodeID;
+import org.agora.graph.JAgoraArgumentID;
 import org.agora.lib.BSONGraphDecoder;
 import org.agora.lib.IJAgoraLib;
 import org.agora.logging.Log;
@@ -27,7 +27,7 @@ public class AddArgumentVoteResponder implements QueryResponder {
     try {
       BasicBSONObject bsonId = (BasicBSONObject) query.get(IJAgoraLib.ARGUMENT_ID_FIELD);
       BSONGraphDecoder dec = new BSONGraphDecoder();
-      JAgoraNodeID nodeID = dec.deBSONiseNodeID(bsonId);
+      JAgoraArgumentID nodeID = dec.deBSONiseNodeID(bsonId);
       int voteType = (int) query.get(IJAgoraLib.VOTE_TYPE_FIELD);
       int userID = query.getInt(IJAgoraLib.USER_ID_FIELD);
       

@@ -3,7 +3,7 @@ package org.agora.server.database;
 import java.io.ByteArrayInputStream;
 import java.sql.PreparedStatement;
 import java.sql.SQLException;
-import org.agora.graph.JAgoraNodeID;
+import org.agora.graph.JAgoraArgumentID;
 import org.agora.server.DatabaseConnection;
 import org.bson.BSONEncoder;
 import org.bson.BSONObject;
@@ -18,7 +18,7 @@ public class DBEditArgument {
     
     protected static String EDIT_QUERY = "UPDATE arguments SET content = ? WHERE arg_id = ? AND user_id = ?;";
     
-    public static boolean editArgumentOnDB(BSONObject content, JAgoraNodeID nodeID, int userID, DatabaseConnection dbc) throws SQLException {
+    public static boolean editArgumentOnDB(BSONObject content, JAgoraArgumentID nodeID, int userID, DatabaseConnection dbc) throws SQLException {
         PreparedStatement ps = dbc.prepareStatement(EDIT_QUERY);
         
         BSONEncoder benc = new BasicBSONEncoder();
