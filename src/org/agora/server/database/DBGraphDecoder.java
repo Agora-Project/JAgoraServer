@@ -78,6 +78,62 @@ public class DBGraphDecoder {
     return true;
   }
   
+  public boolean loadGraphbyArgumentID(Statement s, JAgoraArgumentID id) 
+          throws SQLException {
+    ResultSet rs = s.executeQuery("SELECT a.arg_ID AS arg_ID, a.source_ID AS source_ID, "
+            + "content, a.date AS date, acceptability, thread_ID, "
+            + "a.user_ID AS user_ID, u.username AS username, "
+            + "SUM(CASE WHEN v.type = 1 THEN 1 ELSE 0 END) AS positive_votes, "
+            + "SUM(CASE WHEN v.type = 0 THEN 1 ELSE 0 END) AS negative_votes "
+            + "FROM `arguments` a LEFT OUTER JOIN `votes` v "
+            + "ON a.arg_ID = v.arg_ID AND a.source_ID = v.source_ID "
+            + "INNER JOIN `users` u ON a.user_ID = u.user_ID "
+            + "WHERE a.arg_ID = '" + id.getLocalID() + "' " + "GROUP BY a.arg_ID, a.source_ID;");
+
+    boolean success = loadNodesFromResultSet(rs);
+    rs.close(); // Is this important?
+    if (!success)
+      return false;
+      
+    rs = s.executeQuery("SELECT a.arg_ID_attacker AS arg_ID_attacker, a.source_ID_attacker AS source_ID_attacker, "
+            + "a.arg_ID_defender AS arg_ID_defender, a.source_ID_defender AS source_ID_defender, "
+            + "arg_att.thread_ID AS att_thread_ID, arg_def.thread_ID AS def_thread_ID, "
+            + "SUM(CASE WHEN v.type = 1 THEN 1 ELSE 0 END) AS positive_votes, "
+            + "SUM(CASE WHEN v.type = 0 THEN 1 ELSE 0 END) AS negative_votes "
+            + "FROM `attacks` a LEFT OUTER JOIN `votes` v "
+            + "ON a.arg_ID_attacker = v.arg_ID_attacker AND a.source_ID_attacker = v.source_ID_attacker AND "
+            + "   a.arg_ID_defender = v.arg_ID_defender AND a.source_ID_defender = v.source_ID_defender "
+            + "INNER JOIN `arguments` arg_att "
+            + "ON a.arg_ID_attacker = arg_att.arg_ID AND a.source_ID_attacker = arg_att.source_ID "
+            + "INNER JOIN `arguments` arg_def "
+            + "ON a.arg_ID_defender = arg_def.arg_ID AND a.source_ID_defender = arg_def.source_ID "
+            + "WHERE v.arg_ID IS NULL AND (a.arg_ID_attacker = '" + id + "' OR a.arg_ID_defender = '" + id + "') "
+            + "GROUP BY a.arg_ID_attacker, a.source_ID_attacker, a.arg_ID_defender, a.source_ID_defender;");
+    success = loadAttacksFromResultSet(rs);
+    rs.close();
+    if (!success)
+      return false;
+    
+    for (JAgoraArgument arg : graph.getNodes()) {
+        rs = s.executeQuery("SELECT a.arg_ID AS arg_ID, a.source_ID AS source_ID, "
+            + "content, a.date AS date, acceptability, thread_ID, "
+            + "a.user_ID AS user_ID, u.username AS username, "
+            + "SUM(CASE WHEN v.type = 1 THEN 1 ELSE 0 END) AS positive_votes, "
+            + "SUM(CASE WHEN v.type = 0 THEN 1 ELSE 0 END) AS negative_votes "
+            + "FROM `arguments` a LEFT OUTER JOIN `votes` v "
+            + "ON a.arg_ID = v.arg_ID AND a.source_ID = v.source_ID "
+            + "INNER JOIN `users` u ON a.user_ID = u.user_ID "
+            + "WHERE a.arg_ID = '" + arg.getID().getLocalID() + "' " + "GROUP BY a.arg_ID, a.source_ID;");
+
+    success = loadNodesFromResultSet(rs);
+    rs.close(); // Is this important?
+    if (!success)
+      return false;
+    }
+    
+    return true;
+  }
+  
   /**
    * Constructs a single node using the current row of the given ResultSet.
    * @param rs

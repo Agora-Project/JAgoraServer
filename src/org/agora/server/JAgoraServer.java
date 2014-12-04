@@ -79,6 +79,7 @@ public class JAgoraServer {
     responders.put(IJAgoraLib.REGISTER_ACTION, new RegisterResponder());
     responders.put(IJAgoraLib.QUERY_THREAD_LIST_ACTION, new ThreadListResponder());
     responders.put(IJAgoraLib.EDIT_ARGUMENT_ACTION, new EditArgumentResponder());
+    responders.put(IJAgoraLib.QUERY_BY_ARGUMENT_ID_ACTION, new QueryArgumentByIDResponder());
   }
   
   public QueryResponder getResponder(int operation) {
