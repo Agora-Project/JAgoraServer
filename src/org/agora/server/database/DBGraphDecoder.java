@@ -107,14 +107,19 @@ public class DBGraphDecoder {
             + "ON a.arg_ID_attacker = arg_att.arg_ID AND a.source_ID_attacker = arg_att.source_ID "
             + "INNER JOIN `arguments` arg_def "
             + "ON a.arg_ID_defender = arg_def.arg_ID AND a.source_ID_defender = arg_def.source_ID "
-            + "WHERE v.arg_ID IS NULL AND (a.arg_ID_attacker = '" + id + "' OR a.arg_ID_defender = '" + id + "') "
+            + "WHERE v.arg_ID IS NULL AND (a.arg_ID_attacker = '" + id.getLocalID() + "' OR a.arg_ID_defender = '" + id.getLocalID() + "') "
             + "GROUP BY a.arg_ID_attacker, a.source_ID_attacker, a.arg_ID_defender, a.source_ID_defender;");
     success = loadAttacksFromResultSet(rs);
     rs.close();
     if (!success)
       return false;
+    ArrayList<JAgoraArgumentID> args = new ArrayList<>();
+    for (JAgoraAttack attack : graph.getAttacks()) {
+        args.add(attack.getOrigin().getID());
+        args.add(attack.getTarget().getID());
+    }
     
-    for (JAgoraArgument arg : graph.getNodes()) {
+    for (JAgoraArgumentID argID : args) {
         rs = s.executeQuery("SELECT a.arg_ID AS arg_ID, a.source_ID AS source_ID, "
             + "content, a.date AS date, acceptability, thread_ID, "
             + "a.user_ID AS user_ID, u.username AS username, "
@@ -123,7 +128,7 @@ public class DBGraphDecoder {
             + "FROM `arguments` a LEFT OUTER JOIN `votes` v "
             + "ON a.arg_ID = v.arg_ID AND a.source_ID = v.source_ID "
             + "INNER JOIN `users` u ON a.user_ID = u.user_ID "
-            + "WHERE a.arg_ID = '" + arg.getID().getLocalID() + "' " + "GROUP BY a.arg_ID, a.source_ID;");
+            + "WHERE a.arg_ID = '" + argID.getLocalID() + "' " + "GROUP BY a.arg_ID, a.source_ID;");
 
     success = loadNodesFromResultSet(rs);
     rs.close(); // Is this important?
