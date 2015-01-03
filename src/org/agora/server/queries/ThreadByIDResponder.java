@@ -15,15 +15,15 @@ public class ThreadByIDResponder implements QueryResponder {
   @Override
   public BasicBSONObject respond(BasicBSONObject query, JAgoraServer server) {
     
-    // Verify session
-    boolean verified = server.verifySession(query);
+    // Verify session. Is this really necessary?
+    //boolean verified = server.verifySession(query);
     
     BasicBSONObject bsonResponse = new BasicBSONObject();
-    if (!verified) {
-      bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
-      bsonResponse.put(IJAgoraLib.REASON_FIELD, "Invalid session ID.");
-      return bsonResponse;
-    }
+//    if (!verified) {
+//      bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
+//      bsonResponse.put(IJAgoraLib.REASON_FIELD, "Invalid session ID.");
+//      return bsonResponse;
+//    }
     
     int threadID = query.getInt(IJAgoraLib.THREAD_ID_FIELD);
     
