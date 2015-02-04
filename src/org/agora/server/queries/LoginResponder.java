@@ -35,7 +35,7 @@ public class LoginResponder implements QueryResponder {
         return bsonResponse;
       }
       //TODO: input sanitisation
-      String strQuery = "SELECT user_ID FROM users WHERE " + 
+      String strQuery = "SELECT user_ID, type FROM users WHERE " + 
           "username = '" + user + "' AND " + 
           "password = '" + pass + "';";
       ResultSet rs = s.executeQuery(strQuery);
@@ -44,7 +44,7 @@ public class LoginResponder implements QueryResponder {
       boolean logged = rs.next();
       
       if (logged) {
-        UserSession session = server.userLogin(user, rs.getInt("user_ID"));
+        UserSession session = server.userLogin(user, rs.getInt("user_ID"), rs.getInt("type"));
         bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_OK);
         bsonResponse.put(IJAgoraLib.SESSION_ID_FIELD, session.getSessionID());
         bsonResponse.put(IJAgoraLib.USER_ID_FIELD, session.getUserID());

@@ -5,11 +5,13 @@ public class UserSession {
   protected String username;
   protected int userID;
   protected String sessionID;
+  protected int userType;
   
-  public UserSession(String username, int userID, String sessionID) {
+  public UserSession(String username, int userID, String sessionID, int userType) {
     this.username = username;
     this.userID = userID;
     this.sessionID = sessionID;
+    this.userType = userType;
   }
 
   @Override
@@ -37,4 +39,7 @@ public class UserSession {
   public String getUsername() { return username; }
   public int getUserID() { return userID; }
   public String getSessionID() { return sessionID; }
+  public int getUserType() { return userType; }
+  
+  public boolean hasPostingPrivilege() { return userType != 1; }
 }

@@ -158,11 +158,11 @@ public class JAgoraServer {
    * @param userID The userID (from the DB)
    * @return The new UserSession 
    */
-  public UserSession userLogin(String user, int userID) {
+  public UserSession userLogin(String user, int userID, int userType) {
     byte[] sessBytes = new byte[Options.SESSION_BYTE_LENGTH];
     rand.nextBytes(sessBytes);
     String sessionID = Util.bytesToHex(sessBytes);
-    UserSession session = new UserSession(user, userID, sessionID);
+    UserSession session = new UserSession(user, userID, sessionID, userType);
     sessions.put(userID, session);
     return session;
   }
@@ -178,7 +178,7 @@ public class JAgoraServer {
     if (us == null)
       return false;
     
-    return us.getSessionID().equals(sessionID);
+    return (us.getSessionID().equals(sessionID) && us.hasPostingPrivilege());
   }
  
   public boolean verifySession(BasicBSONObject query) {
@@ -189,7 +189,7 @@ public class JAgoraServer {
     if (us == null)
       return false;
     
-    return us.getSessionID().equals(sessionID);
+    return (us.getSessionID().equals(sessionID) && us.hasPostingPrivilege());
   }
   
   
