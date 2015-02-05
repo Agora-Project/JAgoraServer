@@ -24,14 +24,14 @@ public class JAgoraWorker extends Thread {
   /**
    * The server from which this worker gets his requests.
    */
-  protected JAgoraServer server;
+  protected JAgoraSocketServer server;
   
   /**
    * Whether the worker should continue running.
    */
   protected boolean running;
   
-  public JAgoraWorker(JAgoraServer server){
+  public JAgoraWorker(JAgoraSocketServer server){
     threadID = ID++;
     this.server = server;
     running = true;
