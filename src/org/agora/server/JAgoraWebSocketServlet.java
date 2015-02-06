@@ -7,7 +7,10 @@ import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 import javax.websocket.OnClose;
 import javax.websocket.OnError;
 import javax.websocket.OnMessage;
@@ -16,6 +19,7 @@ import javax.websocket.Session;
 import javax.websocket.server.ServerEndpoint;
 import org.agora.lib.IJAgoraLib;
 import org.agora.lib.JAgoraComms;
+import org.agora.logging.Log;
 import org.agora.server.queries.AddArgumentResponder;
 import org.agora.server.queries.AddArgumentVoteResponder;
 import org.agora.server.queries.AddAttackResponder;
@@ -41,7 +45,11 @@ public class JAgoraWebSocketServlet implements JAgoraServer{
     
     private Session session;
     
+    protected Random rand;
+    
     protected Map<Integer, QueryResponder> responders;
+    
+    protected static ConcurrentMap<Integer, UserSession> sessions;
     
     public JAgoraWebSocketServlet() {
         
@@ -49,7 +57,12 @@ public class JAgoraWebSocketServlet implements JAgoraServer{
     
     @OnOpen
     public void start(Session session) {
+        rand = new Random();
         this.session = session;
+        
+        if (sessions == null) {
+            sessions = new ConcurrentHashMap<>();
+        }
         
         initialiseResponders();
         
@@ -79,15 +92,15 @@ public class JAgoraWebSocketServlet implements JAgoraServer{
     }
     
     public BasicBSONObject processBSONRequest(BasicBSONObject request) {
-    int requestType = (Integer)request.get(IJAgoraLib.ACTION_FIELD);
-    QueryResponder r = this.getResponder(requestType);
-    if (r == null) {
-      BasicBSONObject response = new BasicBSONObject();
-      response.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
-      response.put(IJAgoraLib.REASON_FIELD, "Cannot handle this request.");
-      return response;
-    }
-    return r.respond(request, this);
+        int requestType = (Integer) request.get(IJAgoraLib.ACTION_FIELD);
+        QueryResponder r = getResponder(requestType);
+        if (r == null) {
+           BasicBSONObject response = new BasicBSONObject();
+           response.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
+           response.put(IJAgoraLib.REASON_FIELD, "Cannot handle this request.");
+           return response;
+        }
+        return r.respond(request, this);
   }
  	
     @OnError
@@ -96,42 +109,71 @@ public class JAgoraWebSocketServlet implements JAgoraServer{
 
     @Override
     public QueryResponder getResponder(int operation) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (!responders.containsKey(operation))
+            return null;
+        return responders.get(operation);
     }
 
     @Override
     public DatabaseConnection createDatabaseConnection() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        DatabaseConnection dbc = new DatabaseConnection(Options.DB_URL,
+                                                        Options.DB_USER,
+                                                        Options.DB_PASS);
+        boolean connected = dbc.open();
+        if(!connected) {
+            Log.error("[JAgoraServer] Could not initiate connection to database.");
+            return null;
+        }
+
+        return dbc;
     }
 
     @Override
     public UserSession userLogin(String user, int userID, int userType) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        byte[] sessBytes = new byte[Options.SESSION_BYTE_LENGTH];
+        rand.nextBytes(sessBytes);
+        String sessionID = Util.bytesToHex(sessBytes);
+        UserSession session = new UserSession(user, userID, sessionID, userType);
+        sessions.put(userID, session);
+        return session;
     }
 
     @Override
     public UserSession getSession(int userID) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        if (!sessions.containsKey(userID))
+            return null;
+        return sessions.get(userID);
     }
 
     @Override
     public boolean verifySession(int userID, String sessionID) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        UserSession us = getSession(userID);
+        if (us == null)
+            return false;
+
+        return (us.getSessionID().equals(sessionID) && us.hasPostingPrivilege());
     }
 
     @Override
     public boolean verifySession(BasicBSONObject query) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        int userID = query.getInt(IJAgoraLib.USER_ID_FIELD);
+        String sessionID = query.getString(IJAgoraLib.SESSION_ID_FIELD);
+
+        UserSession us = getSession(userID);
+        if (us == null)
+            return false;
+
+        return (us.getSessionID().equals(sessionID) && us.hasPostingPrivilege());
     }
 
     @Override
     public boolean logoutUser(int userID) {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return sessions.remove(userID) != null;
     }
 
     @Override
     public BlockingQueue<Socket> getRequestQueue() {
-        throw new UnsupportedOperationException("Will never be supported, use JAgoraSocketServer instead."); //To change body of generated methods, choose Tools | Templates.
+        throw new UnsupportedOperationException("Operation will never be supported, use JAgoraSocketServer instead."); 
     }
     
     protected void readConfigurationFiles() {
