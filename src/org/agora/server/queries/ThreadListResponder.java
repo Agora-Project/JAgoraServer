@@ -15,15 +15,14 @@ import org.bson.BasicBSONObject;
  *
  * @author greg
  */
-public class ThreadListResponder implements QueryResponder{
+public class ThreadListResponder implements QueryResponder {
 
-    @Override
-    public BasicBSONObject respond(BasicBSONObject query, JAgoraServer server) {
-        
+  @Override
+  public BasicBSONObject respond(BasicBSONObject query, JAgoraServer server) {
+
     //boolean verified = server.verifySession(query);
-    
     BasicBSONObject bsonResponse = new BasicBSONObject();
-    
+
     try (DatabaseConnection dbc = server.createDatabaseConnection()) {
       if (dbc == null) {
         Log.error("[ThreadListResponder] Could not connect to database.");
@@ -31,7 +30,7 @@ public class ThreadListResponder implements QueryResponder{
         bsonResponse.put(IJAgoraLib.REASON_FIELD, "Server failure.");
         return bsonResponse;
       }
-      
+
       Statement s = dbc.produceStatement();
       if (s == null) {
         Log.error("[ThreadListResponder] Could not create statement.");
@@ -39,21 +38,21 @@ public class ThreadListResponder implements QueryResponder{
         bsonResponse.put(IJAgoraLib.REASON_FIELD, "Server failure.");
         return bsonResponse;
       }
-      
+
       ArrayList<JAgoraThread> threads;
       DBGraphDecoder dgd = new DBGraphDecoder();
       threads = dgd.getThreads(s);
-      
+
       BSONThreadListEncoder enc = new BSONThreadListEncoder();
       BasicBSONObject bsonThreads = enc.BSONiseThreadList(threads);
-      
+
       // Add it to the response
       bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_OK);
       bsonResponse.put(IJAgoraLib.THREAD_LIST_FIELD, bsonThreads);
       return bsonResponse;
-      
+
     } catch (Exception e) {
-      Log.error("[ThreadListResponder] Could not execute query ("+e.getMessage()+")");
+      Log.error("[ThreadListResponder] Could not execute query (" + e.getMessage() + ")");
       bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
       bsonResponse.put(IJAgoraLib.REASON_FIELD, "Server failure.");
       return bsonResponse;
