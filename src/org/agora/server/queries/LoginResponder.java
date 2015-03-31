@@ -48,6 +48,7 @@ public class LoginResponder implements QueryResponder {
         bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_OK);
         bsonResponse.put(IJAgoraLib.SESSION_ID_FIELD, session.getSessionID());
         bsonResponse.put(IJAgoraLib.USER_ID_FIELD, session.getUserID());
+        bsonResponse.put(IJAgoraLib.USER_TYPE_FIELD, session.getUserType());
       } else {
         bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
         bsonResponse.put(IJAgoraLib.REASON_FIELD, "Wrong username/password.");

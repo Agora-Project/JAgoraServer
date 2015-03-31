@@ -21,12 +21,19 @@ public class DeleteArgumentResponder implements QueryResponder {
     
     boolean verified = server.verifySession(query);
     
-        if (!verified) {
-            bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
-            bsonResponse.put(IJAgoraLib.REASON_FIELD, "Invalid session ID.");
-            return bsonResponse;
-        }
-    
+    if (!verified) {
+      bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
+      bsonResponse.put(IJAgoraLib.REASON_FIELD, "Invalid session ID.");
+      return bsonResponse;
+    }
+
+    verified = server.getSession(query.getInt(IJAgoraLib.USER_ID_FIELD)).hasModeratingPrivilege();
+        
+    if (!verified) {
+      bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
+      bsonResponse.put(IJAgoraLib.REASON_FIELD, "Not a Moderator.");
+      return bsonResponse;
+    }
 
     JAgoraArgumentID id = new BSONGraphDecoder().deBSONiseNodeID((BasicBSONObject) query.get(IJAgoraLib.ARGUMENT_ID_FIELD));
 

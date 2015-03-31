@@ -42,4 +42,5 @@ public class UserSession {
   public int getUserType() { return userType; }
   
   public boolean hasPostingPrivilege() { return userType != 1; }
+  public boolean hasModeratingPrivilege() { return userType == 2; }
 }
