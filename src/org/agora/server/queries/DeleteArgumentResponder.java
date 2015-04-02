@@ -1,15 +1,12 @@
 package org.agora.server.queries;
 
 import java.sql.SQLException;
-import java.sql.Statement;
 import org.agora.graph.JAgoraArgumentID;
 
-import org.agora.graph.JAgoraGraph;
 import org.agora.lib.*;
 import org.agora.logging.Log;
 import org.agora.server.*;
 import org.agora.server.database.DBDeleteArgument;
-import org.agora.server.database.DBGraphDecoder;
 import org.bson.BasicBSONObject;
 
 public class DeleteArgumentResponder implements QueryResponder {
@@ -40,14 +37,6 @@ public class DeleteArgumentResponder implements QueryResponder {
     try (DatabaseConnection dbc = server.createDatabaseConnection()) {
       if (dbc == null) {
         Log.error("[DeleteArgumentResponder] Could not connect to database.");
-        bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
-        bsonResponse.put(IJAgoraLib.REASON_FIELD, "Server failure.");
-        return bsonResponse;
-      }
-
-      Statement s = dbc.produceStatement();
-      if (s == null) {
-        Log.error("[DeleteArgumentResponder] Could not create statement.");
         bsonResponse.put(IJAgoraLib.RESPONSE_FIELD, IJAgoraLib.SERVER_FAIL);
         bsonResponse.put(IJAgoraLib.REASON_FIELD, "Server failure.");
         return bsonResponse;
