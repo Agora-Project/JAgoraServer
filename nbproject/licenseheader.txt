@@ -1,5 +1,3 @@
-/*
-
 Copyright (C) 2015 Agora Communication Corporation
 
     This program is free software; you can redistribute it and/or modify
@@ -15,13 +13,3 @@ Copyright (C) 2015 Agora Communication Corporation
     You should have received a copy of the GNU General Public License along
     with this program; if not, write to the Free Software Foundation, Inc.,
     51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
-*/
-
-package org.agora.server.queries;
-
-import org.agora.server.JAgoraServer;
-import org.bson.BasicBSONObject;
-
-public interface QueryResponder {
-  BasicBSONObject respond(BasicBSONObject query, JAgoraServer server);
-}
